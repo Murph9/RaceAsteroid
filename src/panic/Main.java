@@ -50,6 +50,7 @@ public class Main extends SimpleApplication {
 
     public static void main(String[] args) {
         Main app = new Main();
+        app.setShowSettings(false);
         app.start();
     }
 
@@ -57,10 +58,8 @@ public class Main extends SimpleApplication {
         super( new EntityDataState(),
                new PhysicsState(),
                new CollisionState(new PanicContactHandler()),
-               new BoundaryState(PanicConstants.boundaryMargin),
                new DecayState(),
                new ModelState(new RetroPanicModelFactory()),
-               new PanicHudState(),
                new MainMenuState() );
     }
 
@@ -80,11 +79,9 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
-        //TODO: add update code
     }
 
     @Override
     public void simpleRender(RenderManager rm) {
-        //TODO: add render code
     }
 }

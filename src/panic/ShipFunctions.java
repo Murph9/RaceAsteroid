@@ -70,12 +70,6 @@ public class ShipFunctions {
     public static final FunctionId F_THRUST = new FunctionId(GROUP, "Thrust");
 
     /**
-     *  Shoots the pimary weapon of the ship.  Default control mapping
-     *  is the space bar.
-     */
-    public static final FunctionId F_SHOOT = new FunctionId(GROUP, "Shoot");
-
-    /**
      *  Initializes a default set of input mappings for the ship functions.
      *  These can be changed later without impact... or multiple input
      *  controls can be mapped to the same function.
@@ -83,8 +77,12 @@ public class ShipFunctions {
     public static void initializeDefaultMappings( InputMapper inputMapper ) {
         // Default key mappings
         inputMapper.map(F_TURN, KeyInput.KEY_A);
+        inputMapper.map(F_TURN, KeyInput.KEY_LEFT);
+        
         inputMapper.map(F_TURN, InputState.Negative, KeyInput.KEY_D);
+        inputMapper.map(F_TURN, InputState.Negative, KeyInput.KEY_RIGHT);
+        
         inputMapper.map(F_THRUST, KeyInput.KEY_W);
-        inputMapper.map(F_SHOOT, KeyInput.KEY_SPACE);
+        inputMapper.map(F_THRUST, KeyInput.KEY_UP);
     }
 }

@@ -35,7 +35,6 @@
 package panic;
 
 import com.jme3.app.Application;
-import com.jme3.audio.AudioNode;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityData;
@@ -68,19 +67,11 @@ public class ShipControlState extends BaseAppState
     private float speed = 1;
     private float maxSpeed = 3; // units/sec
     private float dampening = 0.9f;
-    private float bulletSpeed = 4;
-    private long bulletDecay = 1500;
-    private float bulletOffset = 0.2f;
 
-    private double lastThrustTime = 0.25;
-    private double thrustInterval = 0.25;
-
-    private AudioNode shoot;
-    private AudioNode thrust;
+    private double lastThrustTime = 0.1;
+    private double thrustInterval = 0.1;
 
     private Vector3f accel = new Vector3f();
-
-    private EntityId lastBullet;
 
     public ShipControlState( EntityId ship ) {
         this.ship = ship;
@@ -95,14 +86,7 @@ public class ShipControlState extends BaseAppState
                                       ShipFunctions.F_TURN,
                                       ShipFunctions.F_THRUST);
         inputMapper.addStateListener(this,
-                                     ShipFunctions.F_THRUST,
-                                     ShipFunctions.F_SHOOT);
-
-        shoot = new AudioNode(app.getAssetManager(), "assets/Sounds/shoot.ogg", false);
-        shoot.setReverbEnabled(false);
-        thrust = new AudioNode(app.getAssetManager(), "assets/Sounds/thrust.ogg", false);
-        thrust.setReverbEnabled(false);
-        thrust.setLooping(true);
+                                     ShipFunctions.F_THRUST);
     }
 
     @Override
@@ -112,8 +96,7 @@ public class ShipControlState extends BaseAppState
                                          ShipFunctions.F_TURN,
                                          ShipFunctions.F_THRUST);
         inputMapper.removeStateListener(this,
-                                        ShipFunctions.F_THRUST,
-                                        ShipFunctions.F_SHOOT);
+                                        ShipFunctions.F_THRUST);
     }
 
     @Override
@@ -149,7 +132,7 @@ public class ShipControlState extends BaseAppState
 
                 // Create a thrust entity
                 EntityId thrust = ed.createEntity();
-                Vector3f thrustVel = accel.mult(-1);
+                Vector3f thrustVel = accel.mult(-4);
                 Vector3f thrustPos = pos.getLocation().add(thrustVel.normalize().multLocal(0.1f));
                 ed.setComponents(thrust,
                                  new Position(thrustPos, new Quaternion()),
@@ -164,42 +147,6 @@ public class ShipControlState extends BaseAppState
     }
 
     public void valueChanged( FunctionId func, InputState value, double tpf ) {
-
-        if( func == ShipFunctions.F_SHOOT && value == InputState.Positive ) {
-
-            // See if the last bullet still exists
-            if( lastBullet != null && ed.getComponent(lastBullet, Position.class) != null ) {
-                // No new bullet allowed
-                return;
-            }
-
-            // Create the bullet and orient it properly.
-            Position pos = ed.getComponent(ship, Position.class);
-
-            Vector3f bulletVel = new Vector3f(0,1,0);
-            pos.getFacing().multLocal(bulletVel);
-
-            // Find the tip of the ship
-            Vector3f bulletPos = bulletVel.mult(bulletOffset);
-            bulletPos.addLocal(pos.getLocation());
-
-            lastBullet = ed.createEntity();
-            ed.setComponents(lastBullet,
-                             new Position(bulletPos, pos.getFacing()),
-                             new Velocity(bulletVel.multLocal(bulletSpeed)),
-                             new ModelType(PanicModelFactory.MODEL_BULLET),
-                             new CollisionShape(0.01f),
-                             new Decay(bulletDecay));
-
-            // Play the sound effect
-            shoot.playInstance();
-        } else if( func == ShipFunctions.F_THRUST ) {
-            if( value == InputState.Positive ) {
-                thrust.play();
-            } else {
-                thrust.stop();
-            }
-        }
     }
 
     protected void integrate( double tpf ) {

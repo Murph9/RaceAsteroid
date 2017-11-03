@@ -35,16 +35,11 @@
 package panic;
 
 import com.jme3.app.Application;
-import com.jme3.asset.AssetManager;
-import com.jme3.audio.AudioNode;
-import com.jme3.audio.AudioSource;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
-import com.simsilica.es.Filters;
 import com.simsilica.lemur.event.BaseAppState;
 
 
@@ -99,19 +94,10 @@ public class SinglePlayerState extends BaseAppState {
 
     private GameState state = GameState.GameOver;
 
-    // Book-keeping for cycled text messages
-    private String[] titles;
-    private int titleIndex;
-    private long lastMessageTime;
-
-    private AudioNode music;
-
     public SinglePlayerState() {
     }
 
     protected void setState( GameState state, String... titles ) {
-        this.titles = titles;
-        this.titleIndex = 0;
         if( state == this.state ) {
             return;
         }
@@ -126,7 +112,6 @@ public class SinglePlayerState extends BaseAppState {
                 break;
             case Starting:
                 resetShip(false, true);
-                startMusic();
                 break;
             case Joining:
                 resetShip(true, true);
@@ -135,13 +120,8 @@ public class SinglePlayerState extends BaseAppState {
                 player.setInvincible(false);
                 break;
             case Death:
-                stopMusic();
-                break;
             case EndLevel:
-                stopMusic();
-                break;
             case GameOver:
-                stopMusic();
                 break;
         }
     }
@@ -150,78 +130,36 @@ public class SinglePlayerState extends BaseAppState {
 
         switch( state ) {
             case LoadLevel:
-                if( !rollMessage(2000) ) {
-                    setState(GameState.Starting, "Ready...", "Set...", "Go!");
-                }
+                setState(GameState.Starting, "Ready...", "Set...", "Go!");
                 break;
             case Starting:
-                if( !rollMessage(1000) ) {
-                    setState(GameState.Joining, "");
-                }
+                setState(GameState.Joining, "");
                 break;
             case Joining:
-                if( !rollMessage(2000) ) {
-                    setState(GameState.Playing);
-                }
+                setState(GameState.Playing);
                 break;
             case Playing:
                 if( player.isDead() ) {
                     setState(GameState.Death, "");
-                } else if( asteroids.applyChanges() ) {
-                    if( asteroids.isEmpty() ) {
-                        setState(GameState.EndLevel, "Level Cleared");
-                    }
-                } else {
-                    // Have to keep doing it so it loops
-                    startMusic();
                 }
                 break;
             case Death:
-                if( !rollMessage(2000) ) {
-                    if( player.getShipsRemaining() <= 0 ) {
-                        setState(GameState.GameOver, "GAME OVER");
-                    } else {
-                        player.addShipsRemaining(-1);
-                        setState(GameState.Starting, "Ready...", "Set...", "Go!");
-                    }
+                if( player.getShipsRemaining() <= 0 ) {
+                    setState(GameState.GameOver, "GAME OVER");
+                } else {
+                    player.addShipsRemaining(-1);
+                    setState(GameState.Starting, "Ready...", "Set...", "Go!");
                 }
                 break;
             case EndLevel:
-                if( !rollMessage(2000) ) {
-                    player.addLevel(1);
-                    setState(GameState.LoadLevel);
-                }
+                player.addLevel(1);
+                setState(GameState.LoadLevel);
                 break;
             case GameOver:
-                if( !rollMessage(2000) ) {
-                    getState(MainMenuState.class).setEnabled(true);
-                    getStateManager().detach(this);
-                }
+                getState(MainMenuState.class).setEnabled(true);
+                getStateManager().detach(this);
                 break;
         }
-    }
-
-    protected boolean rollMessage(long delta) {
-
-        // Check for no text set at all... in which
-        // case there is never a delay
-        if( titles.length == 0 ) {
-            getState(PanicHudState.class).setTitle("");
-            return false;
-        }
-
-        // See if it's time to roll to the new text
-        long time = System.currentTimeMillis();
-        if( time - lastMessageTime > delta ) {
-            if( titleIndex < titles.length ) {
-                lastMessageTime = time;
-                getState(PanicHudState.class).setTitle(titles[titleIndex]);
-            } else {
-                getState(PanicHudState.class).setTitle("");
-            }
-            titleIndex++;
-        }
-        return titleIndex <= titles.length;
     }
 
     protected void resetShip( boolean mobile, boolean invincible ) {
@@ -236,62 +174,6 @@ public class SinglePlayerState extends BaseAppState {
     }
 
     protected void setupLevel() {
-
-        // Get rid of any existing asteroids
-        // This happens if we start a new game after we
-        // left the old game's asteroids bouncing around.
-        asteroids.applyChanges();
-        for( Entity e : asteroids ) {
-            ed.removeEntity(e.getId());
-        }
-
-        int bigCount = Math.min(2 + player.getLevel(), 12);
-        float minRadius = PanicConstants.maxAsteroidRadius;
-        float maxRadius = PanicConstants.maxAsteroidRadius;
-        float maxSpeed = 1;
-        float maxRotation = 1;
-        for( int i = 0; i < bigCount; i++ ) {
-
-            EntityId test = ed.createEntity();
-
-            Vector3f loc = new Vector3f((float)Math.random() * 12 - 6f,
-                                        (float)Math.random() * 8 - 4f,
-                                        0);
-            Vector3f vel = new Vector3f((float)Math.random() * maxSpeed * 2 - maxSpeed,
-                                        (float)Math.random() * maxSpeed * 2 - maxSpeed,
-                                        0);
-            float rot = (float)Math.random() * maxRotation * 2 - maxRotation;
-
-            float radius = (float)(minRadius + Math.random() * (maxRadius - minRadius));
-
-            // Asteroid and other entity creation really needs to be
-            // consolidated.  Currently asteroid entities are created
-            // here and in the PanicContactHandler.
-            ed.setComponents(test,
-                             new Position(loc, new Quaternion()),
-                             new Velocity(vel, new Vector3f(0,0,rot)),
-                             new CollisionShape(radius),
-                             new Mass(radius),
-                             new ModelType(PanicModelFactory.MODEL_ASTEROID));
-            }
-    }
-
-    protected void startMusic() {
-        if( music == null || music.getStatus() == AudioSource.Status.Stopped ) {
-            AssetManager assets = getApplication().getAssetManager();
-            music = new AudioNode(assets, "assets/Sounds/panic-ambient.ogg", true);
-            music.setReverbEnabled(false);
-            music.setPositional(false);
-            music.setVolume(0.6f);
-            music.play();
-        }
-    }
-
-    protected void stopMusic() {
-        if( music != null ) {
-            music.stop();
-            music = null;
-        }
     }
 
     @Override
@@ -310,12 +192,7 @@ public class SinglePlayerState extends BaseAppState {
                 = (PanicContactHandler)getState(CollisionState.class).getContactHandler();
         contactHandler.setPlayer( player );
 
-        getState(PanicHudState.class).setCurrentPlayer(player);
-
-        this.ed = getState(EntityDataState.class).getEntityData();
-        asteroids = ed.getEntities(Filters.fieldEquals(ModelType.class, "type",
-                                                       PanicModelFactory.MODEL_ASTEROID),
-                                   ModelType.class);
+        ed = getState(EntityDataState.class).getEntityData();
 
         ship = ed.createEntity();
         ed.setComponents(ship,
@@ -333,7 +210,8 @@ public class SinglePlayerState extends BaseAppState {
 
     @Override
     protected void cleanup( Application app ) {
-        asteroids.release();
+        if (asteroids != null)
+        	asteroids.release();
         asteroids = null;
         getStateManager().detach(getState(ShipControlState.class));
     }

@@ -56,12 +56,8 @@ import com.simsilica.es.EntityData;
  */
 public class PanicModelFactory implements ModelFactory {
 
-    public static final String MODEL_ASTEROID = "asteroid";
-    public static final String MODEL_DEBRIS = "debris";
-    public static final String MODEL_SHIP_DEBRIS = "shipDebris";
     public static final String MODEL_SHIP = "ship";
     public static final String MODEL_THRUST = "thrust";
-    public static final String MODEL_BULLET = "bullet";
 
     private ModelState state;
     private AssetManager assets;
@@ -74,39 +70,8 @@ public class PanicModelFactory implements ModelFactory {
     }
 
     public Spatial createModel( Entity e ) {
-
         ModelType type = e.get(ModelType.class);
-        if( MODEL_ASTEROID.equals(type.getType()) ) {
-            CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
-            float radius = cs == null ? 0.05f : cs.getRadius();
-
-            Box b = new Box(radius, radius, radius);
-            Geometry geom = new Geometry("Asteroid", b);
-
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Blue);
-            geom.setMaterial(mat);
-
-            return geom;
-        } else if( MODEL_DEBRIS.equals(type.getType()) ) {
-            float radius = 0.05f;
-            Box b = new Box(radius, radius, radius);
-            Geometry geom = new Geometry("Debris", b);
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Cyan);
-            geom.setMaterial(mat);
-
-            return geom;
-        } else if( MODEL_SHIP_DEBRIS.equals(type.getType()) ) {
-            float radius = 0.05f;
-            Box b = new Box(radius, radius, radius);
-            Geometry geom = new Geometry("Debris", b);
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Cyan);
-            geom.setMaterial(mat);
-
-            return geom;
-        } else if( MODEL_SHIP.equals(type.getType()) ) {
+        if( MODEL_SHIP.equals(type.getType()) ) {
             CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
             float radius = cs == null ? 0.1f : cs.getRadius();
 
@@ -119,7 +84,7 @@ public class PanicModelFactory implements ModelFactory {
 
             return geom;
         } else if( MODEL_THRUST.equals(type.getType()) ) {
-            Box b = new Box(0.01f, 0.01f, 0.01f);
+            Box b = new Box(0.5f, 0.5f, 0.5f);
             Geometry geom = new Geometry("Thrust", b);
 
             Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -127,23 +92,13 @@ public class PanicModelFactory implements ModelFactory {
             geom.setMaterial(mat);
 
             return geom;
-        } else if( MODEL_BULLET.equals(type.getType()) ) {
-            Box b = new Box(0.01f, 0.1f, 0.01f);
-            Geometry geom = new Geometry("Bullet", b);
-
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Yellow);
-            geom.setMaterial(mat);
-
-            return geom;
         } else {
-            Box b = new Box(0.1f, 0.1f, 0.1f);
-            Geometry geom = new Geometry("Test", b);
-
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Blue);
-            geom.setMaterial(mat);
-            return geom;
+            try {
+				throw new Exception("unknown type");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				return null;
+			}
         }
     }
 }

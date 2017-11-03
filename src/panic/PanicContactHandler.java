@@ -34,15 +34,9 @@
 
 package panic;
 
-import com.jme3.asset.AssetManager;
-import com.jme3.audio.AudioNode;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
-import com.simsilica.es.EntityId;
-
 
 /**
  *  Asteroid Panic-specific contact handler.  Performs simple
@@ -57,18 +51,8 @@ import com.simsilica.es.EntityId;
  */
 public class PanicContactHandler implements ContactHandler {
 
-    private static int[] scores = PanicConstants.scores;
-
     private EntityData ed;
     private PanicPlayer player;
-
-    private float minRadius = PanicConstants.minAsteroidRadius;
-
-    // For now... included here directly
-    private AudioNode bump1;
-    private AudioNode bump2;
-    private AudioNode boom1;
-    private AudioNode boom2;
 
     public PanicContactHandler() {
     }
@@ -85,16 +69,6 @@ public class PanicContactHandler implements ContactHandler {
         }
 
         this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
-
-        AssetManager assets = state.getApplication().getAssetManager();
-        bump1 = new AudioNode(assets, "assets/Sounds/low-bang.ogg", false);
-        bump1.setReverbEnabled(false);
-        bump2 = new AudioNode(assets, "assets/Sounds/high-bang.ogg", false);
-        bump2.setReverbEnabled(false);
-        boom1 = new AudioNode(assets, "assets/Sounds/boom1.ogg", false);
-        boom1.setReverbEnabled(false);
-        boom2 = new AudioNode(assets, "assets/Sounds/boom2.ogg", false);
-        boom2.setReverbEnabled(false);
     }
 
     protected float getInvMass( Entity e ) {
@@ -154,6 +128,9 @@ public class PanicContactHandler implements ContactHandler {
 
     protected void shipCollision( Entity ship, Entity other, ModelType type, Vector3f cp, Vector3f cn, float penetration )
     {
+    	//ignore for now
+    	
+    	/*
         Velocity v1 = ed.getComponent(ship.getId(), Velocity.class);
         Vector3f vl1 = v1.getLinear();
         Velocity v2 = ed.getComponent(other.getId(), Velocity.class);
@@ -193,96 +170,14 @@ public class PanicContactHandler implements ContactHandler {
 
         // Make an explosion sound
         boom1.playInstance();
-    }
-
-    protected void bulletCollision( Entity bullet, Entity other, ModelType type, Vector3f cp, Vector3f cn, float penetration )
-    {
-        // Don't let us shoot ourselves for now
-        if( PanicModelFactory.MODEL_SHIP.equals(type.getType()) ) {
-            return;
-        }
-
-        // Blow it up!
-
-        // First we gather the properties of the asteroid we will be
-        // destroying
-        Position pos = other.get(Position.class);
-        Vector3f loc = pos.getLocation();
-        CollisionShape shape = other.get(CollisionShape.class);
-        float radius = shape.getRadius();
-
-        // Increase the score
-        int size = Math.min((int)(0.6 / radius), scores.length-1);
-        player.addScore( scores[size] );
-
-        // If the radius is greater than minRadius then we split it
-        if( radius > minRadius ) {
-
-            // Create two new smaller asteroids and destroy the original
-            Velocity vel = ed.getComponent(other.getId(), Velocity.class);
-            Vector3f v = vel.getLinear();
-
-            // Calculate new positions perpendicular to the impact point
-            Vector3f cross = cn.cross(Vector3f.UNIT_Z);
-            //System.out.println( "Cross:" + cross );
-            float newRadius = radius * 0.5f;
-            Vector3f loc1 = loc.add(cross.mult(newRadius));
-            Vector3f loc2 = loc.subtract(cross.mult(newRadius));
-
-            float explosiveEnergy = 1;
-            float explosiveAngularEnergy = 1;
-            Vector3f v1 = v.add(cross.mult(explosiveEnergy));
-            v1.addLocal(cn.mult(explosiveEnergy));
-            Vector3f v2 = v.subtract(cross.mult(explosiveEnergy));
-            v2.addLocal(cn.mult(explosiveEnergy));
-            Vector3f a1 = vel.getAngular().add(0, 0, explosiveAngularEnergy);
-            Vector3f a2 = vel.getAngular().add(0, 0, -explosiveAngularEnergy);
-
-            // Need to consolidate asteroid entity creation somewhere.
-            EntityId asteroid1 = ed.createEntity();
-            ed.setComponents(asteroid1,
-                            new Position( loc1, new Quaternion() ),
-                            new Velocity( v1, a1),
-                            new CollisionShape( newRadius ),
-                            new Mass( newRadius ),
-                            new ModelType( PanicModelFactory.MODEL_ASTEROID ) );
-            EntityId asteroid2 = ed.createEntity();
-            ed.setComponents(asteroid2,
-                            new Position( loc2, new Quaternion() ),
-                            new Velocity( v2, a2),
-                            new CollisionShape( newRadius ),
-                            new Mass( newRadius ),
-                            new ModelType( PanicModelFactory.MODEL_ASTEROID ) );
-            }
-
-        ed.removeEntity(other.getId());
-
-        // And destroy the bullet... it's job is done
-        ed.removeEntity(bullet.getId());
-
-        // Create some explosive debris from fake asteroids with no
-        // collision shapes
-        int debrisCount = (int)((Math.random() * 5) + 5);
-        float angleOffset = (float)Math.random();
-        for( int i = 0; i < debrisCount; i++ ) {
-            EntityId debris = ed.createEntity();
-            float angle = angleOffset + ((float)i / debrisCount) * FastMath.TWO_PI;
-            float x = FastMath.cos(angle) * 2;
-            float y = FastMath.sin(angle) * 2;
-            float spin = (float)Math.random() * FastMath.PI * 4 - FastMath.PI * 2;
-            ed.setComponents(debris,
-                             new Position(cp, new Quaternion()),
-                             new Velocity(new Vector3f(x,y,0), new Vector3f(0,0,spin)),
-                             new ModelType(PanicModelFactory.MODEL_DEBRIS),
-                             new Decay(500));
-        }
-
-        // Make an explosion sound
-        boom2.playInstance();
+        */
     }
 
     public void handleContact( Entity e1, Entity e2, Vector3f cp, Vector3f cn, float penetration )
     {
+    	return;
+    	/* ignore for now
+    	
         resolveCollision(e1, e2, cp, cn, penetration);
 
         // Now, if it's a specific kind of collision then we
@@ -297,10 +192,6 @@ public class PanicContactHandler implements ContactHandler {
             shipCollision(e1, e2, t2, cp, cn, penetration);
         } else if( PanicModelFactory.MODEL_SHIP.equals(t2.getType()) ) {
             shipCollision(e2, e1, t1, cp, cn.mult(-1), penetration);
-        } else if( PanicModelFactory.MODEL_BULLET.equals(t1.getType()) ) {
-            bulletCollision(e1, e2, t2, cp, cn, penetration);
-        } else if( PanicModelFactory.MODEL_BULLET.equals(t2.getType()) ) {
-            bulletCollision(e2, e1, t1, cp, cn.mult(-1), penetration);
         } else {
             // Assume asteroid to asteroid
 
@@ -324,5 +215,6 @@ public class PanicContactHandler implements ContactHandler {
                 bump1.playInstance();
             }
         }
+        */
     }
 }

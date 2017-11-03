@@ -41,7 +41,6 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
-import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
 import com.simsilica.es.Entity;
@@ -56,12 +55,8 @@ import com.simsilica.es.EntityData;
  */
 public class RetroPanicModelFactory implements ModelFactory {
 
-    public static final String MODEL_ASTEROID = "asteroid";
-    public static final String MODEL_DEBRIS = "debris";
-    public static final String MODEL_SHIP_DEBRIS = "shipDebris";
     public static final String MODEL_SHIP = "ship";
     public static final String MODEL_THRUST = "thrust";
-    public static final String MODEL_BULLET = "bullet";
 
     private ModelState state;
     private AssetManager assets;
@@ -114,37 +109,19 @@ public class RetroPanicModelFactory implements ModelFactory {
     public Spatial createModel( Entity e ) {
 
         ModelType type = e.get(ModelType.class);
-        if( MODEL_ASTEROID.equals(type.getType()) ) {
-            CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
-            float radius = cs == null ? 0.05f : cs.getRadius();
-
-            int column = radius >= 0.6f ? 1 : radius >= 0.3f ? 2 : 3;
-            int sprite = (int)(Math.random() * 4);
-
-            Geometry geom = createSprite("Asteroid", radius*2.25f, ColorRGBA.Blue, column, sprite);
-            return geom;
-        } else if( MODEL_DEBRIS.equals(type.getType()) ) {
-            int sprite = (int)(Math.random() * 5);
-            return createSprite("Debris", 0.4f, ColorRGBA.Blue, 0, sprite);
-        } else if( MODEL_SHIP_DEBRIS.equals(type.getType()) ) {
-            int sprite = (int)(Math.random() * 5);
-            return createSprite("ShipDebris", 0.2f, ColorRGBA.Cyan, 0, sprite);
-        } else if( MODEL_SHIP.equals(type.getType()) ) {
+        if (MODEL_SHIP.equals(type.getType())) {
             CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
             float radius = cs == null ? 0.1f : cs.getRadius();
             return createSprite("Ship", radius * 4, ColorRGBA.Cyan, 0, 7);
         } else if( MODEL_THRUST.equals(type.getType()) ) {
             return createSprite("Thrust", 0.5f, ColorRGBA.Red, 0, 5);
-        } else if( MODEL_BULLET.equals(type.getType()) ) {
-            return createSprite("Bullet", 0.4f, ColorRGBA.Yellow, 0, 6);
         } else {
-            Box b = new Box(0.1f, 0.1f, 0.1f);
-            Geometry geom = new Geometry("Test", b);
-
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Blue);
-            geom.setMaterial(mat);
-            return geom;
+            try {
+				throw new Exception("Unknown type: " + type.getType());
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				return null;
+			}
         }
     }
 }

@@ -35,9 +35,6 @@
 package panic;
 
 import com.jme3.app.Application;
-import com.jme3.asset.AssetManager;
-import com.jme3.audio.AudioNode;
-import com.jme3.audio.AudioSource;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.simsilica.lemur.Button;
@@ -59,12 +56,6 @@ public class MainMenuState extends BaseAppState {
 
     private Container menu;
 
-    private AudioNode selectUp;
-    private AudioNode selectDown;
-    private AudioNode selectNeutral;
-
-    private AudioNode music;
-
     public MainMenuState() {
     }
 
@@ -73,15 +64,13 @@ public class MainMenuState extends BaseAppState {
 
         menu = new Container(new SpringGridLayout(), new ElementId(PanicStyles.MENU_ID), "retro");
 
-        menu.addChild(new Label("Asteroid Panic", new ElementId(PanicStyles.MENU_TITLE_ID), "retro"));
+        menu.addChild(new Label("Race Asteroid", new ElementId(PanicStyles.MENU_TITLE_ID), "retro"));
 
         Button start = menu.addChild(new Button("Start Game", "retro"));
         start.addClickCommands(new Start());
-        start.addCommands(Button.ButtonAction.HighlightOn, new Highlight());
 
         Button exit = menu.addChild(new Button("Exit", "retro"));
         exit.addClickCommands(new Exit());
-        exit.addCommands(Button.ButtonAction.HighlightOn, new Highlight());
 
         Camera cam = app.getCamera();
         float menuScale = cam.getHeight()/720f;
@@ -91,18 +80,6 @@ public class MainMenuState extends BaseAppState {
                                  cam.getHeight() * 0.75f + pref.y * 0.5f * menuScale,
                                  10);
         menu.setLocalScale(menuScale);
-
-        AssetManager assets = app.getAssetManager();
-        selectUp = new AudioNode(assets, "assets/Sounds/select-up.ogg", false);
-        selectUp.setReverbEnabled(false);
-        selectUp.setPositional(false);
-        selectDown = new AudioNode(assets, "assets/Sounds/select-down.ogg", false);
-        selectDown.setReverbEnabled(false);
-        selectDown.setPositional(false);
-        selectNeutral = new AudioNode(assets, "assets/Sounds/select-neutral.ogg", false);
-        selectNeutral.setReverbEnabled(false);
-        selectNeutral.setPositional(false);
-
     }
 
     @Override
@@ -111,48 +88,21 @@ public class MainMenuState extends BaseAppState {
 
     @Override
     public void update( float tpf ) {
-        startMusic();
-    }
-
-    protected void startMusic() {
-        if( music == null || music.getStatus() == AudioSource.Status.Stopped ) {
-            AssetManager assets = getApplication().getAssetManager();
-            music = new AudioNode(assets, "assets/Sounds/panic-menu-theme.ogg", true);
-            music.setReverbEnabled(false);
-            music.setPositional(false);
-            music.play();
-        }
-    }
-
-    protected void stopMusic() {
-        if( music != null ) {
-            music.stop();
-            music = null;
-        }
     }
 
     @Override
     protected void enable() {
         Main main = (Main)getApplication();
         main.getGuiNode().attachChild(menu);
-        startMusic();
     }
 
     @Override
     protected void disable() {
         menu.removeFromParent();
-        stopMusic();
-    }
-
-    private class Highlight implements Command<Button> {
-        public void execute( Button source ) {
-            selectNeutral.playInstance();
-        }
     }
 
     private class Start implements Command<Button> {
         public void execute( Button source ) {
-            selectUp.playInstance();
             getStateManager().attach(new SinglePlayerState());
             setEnabled(false);
         }
@@ -160,7 +110,6 @@ public class MainMenuState extends BaseAppState {
 
     private class Exit implements Command<Button> {
         public void execute( Button source ) {
-            selectDown.playInstance();
             getApplication().stop();
         }
     }
