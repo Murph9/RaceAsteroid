@@ -45,57 +45,25 @@ import com.simsilica.lemur.core.VersionedReference;
  */
 public class PanicPlayer {
 
+	public static final float COLLISION_TIME = 1;
+	
     private VersionedHolder<Integer> level = new VersionedHolder<Integer>(1);
     private VersionedHolder<Integer> score = new VersionedHolder<Integer>(0);
     private VersionedHolder<Integer> shipsRemaining = new VersionedHolder<Integer>(0);
 
-    private boolean invincible = true;
-    private boolean dead = false;
+    private float collision = 0;
 
     public PanicPlayer( int ships ) {
         shipsRemaining.setObject(ships);
     }
 
-    public void setInvincible( boolean f ) {
-        this.invincible = f;
+    public void setCollision(float set) {
+    	collision = set;
     }
-
-    public boolean isInvincible() {
-        return invincible;
+    public float getCollision() {
+    	return collision;
     }
-
-    public void setDead( boolean f ) {
-        this.dead = f;
-    }
-
-    public boolean isDead() {
-        return dead;
-    }
-
-    public void addLevel( int add ) {
-        level.setObject(level.getObject() + add);
-    }
-
-    public int getLevel() {
-        return level.getObject();
-    }
-
-    public void addScore( int add ) {
-        score.setObject(score.getObject() + add);
-    }
-
-    public int getScore() {
-        return score.getObject();
-    }
-
-    public void addShipsRemaining( int add ) {
-        shipsRemaining.setObject(shipsRemaining.getObject() + add);
-    }
-
-    public int getShipsRemaining() {
-        return shipsRemaining.getObject();
-    }
-
+    
     public VersionedReference<Integer> getLevelRef() {
         return level.createReference();
     }
@@ -108,5 +76,4 @@ public class PanicPlayer {
         return shipsRemaining.createReference();
     }
 }
-
 

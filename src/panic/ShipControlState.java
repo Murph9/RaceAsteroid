@@ -47,155 +47,96 @@ import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
 
-
 /**
- *  Maps player input into ship control.  Note: this state
- *  takes over the job of applying acceleration to the ship's
- *  velocity.  This could easily be moved into the physics
- *  system by adding an Acceleration component.
+ * Maps player input into ship control. Note: this state takes over the job of
+ * applying acceleration to the ship's velocity. This could easily be moved into
+ * the physics system by adding an Acceleration component.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public class ShipControlState extends BaseAppState
-                              implements AnalogFunctionListener, StateFunctionListener {
+public class ShipControlState extends BaseAppState implements AnalogFunctionListener, StateFunctionListener {
 
-    private EntityData ed;
-    private EntityId ship;
-    private long lastFrame;
+	private EntityData ed;
+	private EntityId ship;
 
-    private float rotateSpeed = 3;
-    private float speed = 1;
-    private float maxSpeed = 3; // units/sec
-    private float dampening = 0.9f;
+	private static final float rotateSpeed = 3;
+	private static final float ACCEL_VALUE = 1;
 
-    private double lastThrustTime = 0.1;
-    private double thrustInterval = 0.1;
+	private double lastThrustTime = 0.1;
+	private double thrustInterval = 0.1;
 
-    private Vector3f accel = new Vector3f();
+	private Vector3f accel = new Vector3f();
 
-    public ShipControlState( EntityId ship ) {
-        this.ship = ship;
-    }
+	public ShipControlState(EntityId ship) {
+		this.ship = ship;
+	}
 
-    @Override
-    protected void initialize( Application app ) {
-        ed = getState(EntityDataState.class).getEntityData();
+	@Override
+	protected void initialize(Application app) {
+		ed = getState(EntityDataState.class).getEntityData();
 
-        InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-        inputMapper.addAnalogListener(this,
-                                      ShipFunctions.F_TURN,
-                                      ShipFunctions.F_THRUST);
-        inputMapper.addStateListener(this,
-                                     ShipFunctions.F_THRUST);
-    }
+		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
+		inputMapper.addAnalogListener(this, ShipFunctions.F_TURN, ShipFunctions.F_THRUST);
+		inputMapper.addStateListener(this, ShipFunctions.F_THRUST);
+	}
 
-    @Override
-    protected void cleanup( Application app ) {
-        InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-        inputMapper.removeAnalogListener(this,
-                                         ShipFunctions.F_TURN,
-                                         ShipFunctions.F_THRUST);
-        inputMapper.removeStateListener(this,
-                                        ShipFunctions.F_THRUST);
-    }
+	@Override
+	protected void cleanup(Application app) {
+		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
+		inputMapper.removeAnalogListener(this, ShipFunctions.F_TURN, ShipFunctions.F_THRUST);
+		inputMapper.removeStateListener(this, ShipFunctions.F_THRUST);
+	}
 
-    @Override
-    protected void enable() {
-        lastFrame = System.nanoTime();
+	@Override
+	protected void enable() {
+		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
+		inputMapper.activateGroup(ShipFunctions.GROUP);
+	}
 
-        InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-        inputMapper.activateGroup(ShipFunctions.GROUP);
-    }
+	@Override
+	protected void disable() {
+		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
+		inputMapper.deactivateGroup(ShipFunctions.GROUP);
+	}
 
-    @Override
-    protected void disable() {
-        InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
-        inputMapper.deactivateGroup(ShipFunctions.GROUP);
-    }
+	public void valueActive(FunctionId func, double value, double tpf) {
+		if (func == ShipFunctions.F_TURN) {
 
-    public void valueActive( FunctionId func, double value, double tpf ) {
-        if( func == ShipFunctions.F_TURN ) {
+			Velocity vel = ed.getComponent(ship, Velocity.class);
+			float rotate = (float) (value * rotateSpeed);
+			ed.setComponent(ship, new Velocity(vel.getLinear(), new Vector3f(0, 0, rotate)));
+		} else if (func == ShipFunctions.F_THRUST) {
 
-            Velocity vel = ed.getComponent(ship, Velocity.class);
-            float rotate = (float)(value * rotateSpeed);
-            ed.setComponent(ship, new Velocity(vel.getLinear(), new Vector3f(0,0,rotate)));
-        } else if( func == ShipFunctions.F_THRUST ) {
+			Position pos = ed.getComponent(ship, Position.class);
+			accel.set(0, (float) (ACCEL_VALUE * value), 0);
+			accel = pos.getFacing().multLocal(accel); // quaternion multlocal applies to the vector
 
-            Position pos = ed.getComponent(ship, Position.class);
-            accel.set(0,(float)(speed * value),0);
-            pos.getFacing().multLocal(accel);
+			lastThrustTime += tpf;
+			if (value != 0 && lastThrustTime >= thrustInterval) {
 
-            lastThrustTime += tpf;
-            if( value != 0 && lastThrustTime >= thrustInterval ) {
+				lastThrustTime = 0;
 
-                lastThrustTime = 0;
+				// Create a thrust entity (TODO push out making a bell curve
+				// shape)
+				EntityId thrust = ed.createEntity();
+				Vector3f thrustVel = accel.mult(-2);
+				Vector3f thrustPos = pos.getLocation().add(thrustVel.normalize().multLocal(0.1f));
+				ed.setComponents(thrust, new Position(thrustPos, new Quaternion()), new Velocity(thrustVel),
+						new Acceleration(new Vector3f()), new ModelType(PanicModelFactory.MODEL_THRUST),
+						new Decay(1000));
 
-                // Create a thrust entity
-                EntityId thrust = ed.createEntity();
-                Vector3f thrustVel = accel.mult(-4);
-                Vector3f thrustPos = pos.getLocation().add(thrustVel.normalize().multLocal(0.1f));
-                ed.setComponents(thrust,
-                                 new Position(thrustPos, new Quaternion()),
-                                 new Velocity(thrustVel),
-                                 new ModelType(PanicModelFactory.MODEL_THRUST),
-                                 new Decay(1000));
+			} else if (value == 0) {
+				lastThrustTime = thrustInterval;
+			}
+		}
+	}
 
-            } else if( value == 0 ) {
-                lastThrustTime = thrustInterval;
-            }
-        }
-    }
+	public void valueChanged(FunctionId func, InputState value, double tpf) {
+	}
 
-    public void valueChanged( FunctionId func, InputState value, double tpf ) {
-    }
-
-    protected void integrate( double tpf ) {
-
-        // We only integrate for thrust
-
-        Velocity vel = ed.getComponent(ship, Velocity.class);
-        Vector3f linear = vel.getLinear();
-        if( accel.lengthSquared() == 0 && linear.lengthSquared() == 0 ) {
-            return;
-        }
-
-        linear.addLocal( (float)(accel.x * tpf),
-                         (float)(accel.y * tpf),
-                         (float)(accel.z * tpf) );
-        if( linear.lengthSquared() > maxSpeed * maxSpeed ) {
-            // Clamp it
-            float len = linear.length();
-            float scale = maxSpeed/len;
-            linear.multLocal(scale);
-        } else if( accel.lengthSquared() == 0 ) {
-            // Dampen it
-            linear.multLocal((float)Math.pow(dampening, tpf));
-        }
-        ed.setComponent(ship, new Velocity(linear, vel.getAngular()));
-    }
-
-    @Override
-    public void update( float tpf ) {
-
-        // Use our own tpf calculation in case frame rate is
-        // running away making this tpf unstable
-        long time = System.nanoTime();
-        long delta = time - lastFrame;
-        lastFrame = time;
-        if( delta == 0 ) {
-            return; // no update to perform
-        }
-
-        double seconds = delta / 1000000000.0;
-
-        // Clamp frame time to no bigger than a certain amount
-        // to prevent physics errors.  A little jitter for slow frames
-        // is better than tunneling/ghost objects
-        if( seconds > 0.1 ) {
-            seconds = 0.1;
-        }
-
-        integrate(seconds);
-    }
+	@Override
+	public void update(float tpf) {
+		ed.setComponent(ship, new Acceleration(accel, ed.getComponent(ship, Acceleration.class).getAngular()));
+	}
 
 }

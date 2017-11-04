@@ -55,12 +55,12 @@ public class Main extends SimpleApplication {
     }
 
     public Main() {
-        super( new EntityDataState(),
+        super(new EntityDataState(),
                new PhysicsState(),
                new CollisionState(new PanicContactHandler()),
                new DecayState(),
                new ModelState(new RetroPanicModelFactory()),
-               new MainMenuState() );
+               new MainMenuState());
     }
 
     @Override

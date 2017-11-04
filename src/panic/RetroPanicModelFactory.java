@@ -38,9 +38,11 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.VertexBuffer.Type;
+import com.jme3.scene.shape.Line;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
 import com.simsilica.es.Entity;
@@ -57,6 +59,7 @@ public class RetroPanicModelFactory implements ModelFactory {
 
     public static final String MODEL_SHIP = "ship";
     public static final String MODEL_THRUST = "thrust";
+    public static final String MODEL_WALL = "wall";
 
     private ModelState state;
     private AssetManager assets;
@@ -105,8 +108,17 @@ public class RetroPanicModelFactory implements ModelFactory {
 
         return geom;
     }
+    
+    protected Geometry createLine(String name, Vector3f end, ColorRGBA color) {
+    	Line l = new Line(new Vector3f(0,0,0), end);
+    	Geometry g = new Geometry(name, l);
+    	Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", color);
+        g.setMaterial(mat);
+        return g;
+    }
 
-    public Spatial createModel( Entity e ) {
+	public Spatial createModel(Entity e) {
 
         ModelType type = e.get(ModelType.class);
         if (MODEL_SHIP.equals(type.getType())) {
@@ -115,6 +127,8 @@ public class RetroPanicModelFactory implements ModelFactory {
             return createSprite("Ship", radius * 4, ColorRGBA.Cyan, 0, 7);
         } else if( MODEL_THRUST.equals(type.getType()) ) {
             return createSprite("Thrust", 0.5f, ColorRGBA.Red, 0, 5);
+        } else if (MODEL_WALL.equals(type.getType())) {
+        	return createLine("Wall", ed.getComponent(e.getId(), CollisionShape.class).getDir(), ColorRGBA.White);
         } else {
             try {
 				throw new Exception("Unknown type: " + type.getType());

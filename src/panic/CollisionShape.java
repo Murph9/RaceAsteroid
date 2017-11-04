@@ -34,28 +34,58 @@
 
 package panic;
 
+import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityComponent;
 
 
 /**
- *  An extremely basic collision shape for entities.  This
- *  is just a simple radius though it could be expanded to
- *  include other shape types as a field instead of just
- *  a raw radius.
+ *  Direction and magnitude of line.
+ *  Start is the position of the object
  *
- *  @author    Paul Speed
+ *  @author    murph
  */
 public class CollisionShape implements EntityComponent
 {
-    private float radius;
+	private final static String TYPE_CIRCLE = "circle";
+	private final static String TYPE_LINE = "line";
+	
+	private String type;
+	private Vector3f dir;
+	private float radius;
+	
+	public static CollisionShape Line(Vector3f dir) {
+		return new CollisionShape(TYPE_LINE, dir, 0);
+	}
+	public static CollisionShape Circle(float radius) {
+		return new CollisionShape(TYPE_CIRCLE, null, radius);
+	}
+	
+	private CollisionShape(String type, Vector3f dir, float radius) {
+		this.type = type;
+		this.dir = dir;
+		this.radius = radius;
+	}
 
-    public CollisionShape( float radius ) {
-        this.radius = radius;
+    public Vector3f getDir() {
+    	if (!type.equals(TYPE_LINE)) {
+			try {
+				throw new Exception("Not valid for type: " + type);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+    	}
+        return dir;
     }
-
-    public float getRadius()
-    {
+    public float getRadius() {
+    	if (!type.equals(TYPE_CIRCLE)) {
+			try {
+				throw new Exception("Not valid for type: " + type);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return Float.NaN;
+			}
+    	}
         return radius;
     }
-
 }

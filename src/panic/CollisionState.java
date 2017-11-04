@@ -35,6 +35,7 @@
 package panic;
 
 import com.jme3.app.Application;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.util.SafeArrayList;
 import com.simsilica.es.Entity;
@@ -43,150 +44,157 @@ import com.simsilica.es.EntitySet;
 import com.simsilica.lemur.event.BaseAppState;
 import java.util.Set;
 
-
 /**
- *  Keeps track of the list of colliders and performs
- *  collision checks.  The concept is general but the implementation
- *  is currently "sphere" specific as only radius checks are done
- *  using the simplified CollisionShape components.
- *  This watches all entities with Position and CollisionShape components.
- *  Any generated contacts are passed to a ContactHandler which can
- *  deal with them directly or turn them into contact entities or whatever
- *  the game requires.  No default contact resolution is performed at
- *  all and is 100% up to the ContactHandler callback object.
- *  For Asteroid Panic, there is a custom handler that implements some
- *  of the game logic based on collisions rather than further involving
- *  the entity system.  This may change.
+ * Keeps track of the list of colliders and performs collision checks. The
+ * concept is general but the implementation is currently "sphere" specific as
+ * only radius checks are done using the simplified CollisionShape components.
+ * This watches all entities with Position and CollisionShape components. Any
+ * generated contacts are passed to a ContactHandler which can deal with them
+ * directly or turn them into contact entities or whatever the game requires. No
+ * default contact resolution is performed at all and is 100% up to the
+ * ContactHandler callback object. For Asteroid Panic, there is a custom handler
+ * that implements some of the game logic based on collisions rather than
+ * further involving the entity system. This may change.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class CollisionState extends BaseAppState {
 
-    private EntityData ed;
-    private EntitySet entities;
+	private EntityData ed;
+	private EntitySet entities;
 
-    private SafeArrayList<Entity> colliders = new SafeArrayList<Entity>(Entity.class);
+	private SafeArrayList<Entity> colliders = new SafeArrayList<Entity>(Entity.class);
 
-    private ContactHandler contactHandler;
+	private ContactHandler contactHandler;
 
-    public CollisionState() {
-    }
+	public CollisionState() {
+	}
 
-    public CollisionState( ContactHandler contactHandler ) {
-        this.contactHandler = contactHandler;
-    }
+	public CollisionState(ContactHandler contactHandler) {
+		this.contactHandler = contactHandler;
+	}
 
-    public void setContactHandler( ContactHandler handler ) {
-        if( this.contactHandler != null ) {
-            this.contactHandler.setCollisionState(null);
-        }
-        this.contactHandler = handler;
-        if( this.contactHandler != null && isInitialized() ) {
-            this.contactHandler.setCollisionState(this);
-        }
-    }
+	public void setContactHandler(ContactHandler handler) {
+		if (this.contactHandler != null) {
+			this.contactHandler.setCollisionState(null);
+		}
+		this.contactHandler = handler;
+		if (this.contactHandler != null && isInitialized()) {
+			this.contactHandler.setCollisionState(this);
+		}
+	}
 
-    public ContactHandler getContactHandler() {
-        return contactHandler;
-    }
+	public ContactHandler getContactHandler() {
+		return contactHandler;
+	}
 
-    protected void addColliders( Set<Entity> set ) {
-        colliders.addAll(set);
-    }
+	protected void addColliders(Set<Entity> set) {
+		colliders.addAll(set);
+	}
 
-    protected void removeColliders( Set<Entity> set ) {
-        colliders.removeAll(set);
-    }
+	protected void removeColliders(Set<Entity> set) {
+		colliders.removeAll(set);
+	}
 
-    protected void generateContacts( Entity e1, Entity e2 ) {
-        Position p1 = e1.get(Position.class);
-        Position p2 = e2.get(Position.class);
-        CollisionShape s1 = e1.get(CollisionShape.class);
-        float r1 = s1.getRadius();
-        CollisionShape s2 = e2.get(CollisionShape.class);
-        float r2 = s2.getRadius();
-        float threshold = r1 + r2;
-        threshold *= threshold;
+	protected void generateContacts(Entity e1, Entity e2) {
+		ModelType t1 = ed.getComponent(e1.getId(), ModelType.class);
+		ModelType t2 = ed.getComponent(e2.getId(), ModelType.class);
+		
+		// only handles collision between circle and line elements
+		// so find out which one is which:
+		if (PanicModelFactory.MODEL_SHIP.equals(t1.getType())) {
+			if (!PanicModelFactory.MODEL_WALL.equals(t2.getType())) {
+				return;
+			}
+			//ship is 1, line is 2
+			generateContactsLineCircle(e2, e1);
+		
+		} else if (PanicModelFactory.MODEL_SHIP.equals(t2.getType())) {
+			if (!PanicModelFactory.MODEL_WALL.equals(t1.getType())) {
+				return;
+			}
+			//ship is 2, line is 1
+			generateContactsLineCircle(e1, e2);
+		} else {
+			//no other collisions possible
+		}
+	}
+	private void generateContactsLineCircle(Entity line, Entity circle) {
 
-        float distSq = p1.getLocation().distanceSquared(p2.getLocation());
-        if( distSq > threshold ) {
-            return; // no collision
-        }
+		CollisionShape s1 = circle.get(CollisionShape.class);
+		Vector3f c = circle.get(Position.class).getLocation();
+		float r = s1.getRadius();
+		CollisionShape s2 = line.get(CollisionShape.class);
+		Vector3f a = line.get(Position.class).getLocation();
+		Vector3f b = a.add(s2.getDir());
+		
+		Vector3f ac = c.subtract(a);
+		Vector3f ab = b.subtract(a);
+		Vector3f ad = ac.project(ab);
+		Vector3f d = ad.add(a);
+		
+		Vector3f cd = d.subtract(c);
+		
+		boolean isInBetween = FastMath.approximateEquals(ad.length()+d.subtract(b).length(), ab.length()); //checks if the point is between
+		if (cd.length() <= r && isInBetween) {
+			contactHandler.handleContact(line, circle, cd.normalize().mult(r).subtract(c), cd.normalize().negate(), cd.length());
+		}
+	}
 
-        // Calculate the contact values...
+	protected void generateContacts() {
+		if (contactHandler == null)
+			return;
 
-        // Find the contact normal.
-        Vector3f cn = p2.getLocation().subtract(p1.getLocation());
-        float dist = cn.length();
-        cn.multLocal(1/dist); // normalize it
+		Entity[] array = colliders.getArray();
+		for (int i = 0; i < array.length; i++) {
+			Entity e1 = array[i];
+			for (int j = i + 1; j < array.length; j++) {
+				Entity e2 = array[j];
+				generateContacts(e1, e2);
+			}
+		}
+	}
 
-        // Positive if penetrating
-        float penetration = (r1 + r2) - dist;
+	@Override
+	protected void initialize(Application app) {
+		ed = getState(EntityDataState.class).getEntityData();
+		entities = ed.getEntities(Position.class, CollisionShape.class);
 
-        // Calculate a contact point half-way along the penetration
-        Vector3f cp = p1.getLocation().add( cn.mult(r1 - penetration * 0.5f) );
+		if (contactHandler != null) {
+			contactHandler.setCollisionState(this);
+		}
+	}
 
-        contactHandler.handleContact(e1, e2, cp, cn, penetration);
-    }
+	@Override
+	protected void cleanup(Application app) {
+		// Release the entity set we grabbed previously
+		entities.release();
+		entities = null;
 
-    protected void generateContacts() {
+		if (contactHandler != null) {
+			contactHandler.setCollisionState(null);
+		}
+	}
 
-        if( contactHandler == null )
-            return;
+	@Override
+	protected void enable() {
+		entities.applyChanges();
+		addColliders(entities);
+	}
 
-        Entity[] array = colliders.getArray();
-        for( int i = 0; i < array.length; i++ ) {
-            Entity e1 = array[i];
-            for( int j = i + 1; j < array.length; j++ ) {
-                Entity e2 = array[j];
-                generateContacts(e1, e2);
-            }
-        }
-    }
+	@Override
+	protected void disable() {
+		removeColliders(entities);
+	}
 
-    @Override
-    protected void initialize( Application app ) {
-        ed = getState(EntityDataState.class).getEntityData();
-        entities = ed.getEntities(Position.class, CollisionShape.class);
+	@Override
+	public void update(float tpf) {
+		if (entities.applyChanges()) {
+			removeColliders(entities.getRemovedEntities());
+			addColliders(entities.getAddedEntities());
+		}
 
-        if( contactHandler != null ) {
-            contactHandler.setCollisionState(this);
-        }
-    }
-
-    @Override
-    protected void cleanup( Application app ) {
-        // Release the entity set we grabbed previously
-        entities.release();
-        entities = null;
-
-        if( contactHandler != null ) {
-            contactHandler.setCollisionState(null);
-        }
-    }
-
-    @Override
-    protected void enable() {
-        entities.applyChanges();
-        addColliders(entities);
-    }
-
-    @Override
-    protected void disable() {
-        removeColliders(entities);
-    }
-
-    @Override
-    public void update( float tpf ) {
-        if( entities.applyChanges() ) {
-            removeColliders(entities.getRemovedEntities());
-            addColliders(entities.getAddedEntities());
-        }
-
-        generateContacts();
-    }
+		generateContacts();
+	}
 
 }
-
-
-

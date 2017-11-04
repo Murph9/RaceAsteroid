@@ -37,15 +37,13 @@ package panic;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 
-
 /**
- *  Called by the CollisionState to handle generated contacts/collisions.
+ * Called by the CollisionState to handle generated contacts/collisions.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
-public interface ContactHandler
-{
-    public void setCollisionState( CollisionState state );
+public interface ContactHandler {
+	public void setCollisionState(CollisionState state);
 
-    public void handleContact( Entity e1, Entity e2, Vector3f cp, Vector3f cn, float penetration );
+	public void handleContact(Entity line, Entity circle, Vector3f cp, Vector3f cn, float penetration);
 }

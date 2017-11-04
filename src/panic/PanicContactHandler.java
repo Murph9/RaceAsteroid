@@ -39,182 +39,101 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 
 /**
- *  Asteroid Panic-specific contact handler.  Performs simple
- *  contact resolution and checks for game state conditions such
- *  as ship-asteroid collisions and missile-asteroid collisions.
- *  It updates the PanicPlayer object accordingly with either a
- *  score or a death.
- *  The resolveCollision() method is general for any frictionless
- *  contact resolution scheme.
+ * Asteroid Panic-specific contact handler. Performs simple contact resolution
+ * and checks for game state conditions such as ship-asteroid collisions and
+ * missile-asteroid collisions. It updates the PanicPlayer object accordingly
+ * with either a score or a death. The resolveCollision() method is general for
+ * any frictionless contact resolution scheme.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class PanicContactHandler implements ContactHandler {
 
-    private EntityData ed;
-    private PanicPlayer player;
+	private EntityData ed;
+	private PanicPlayer player;
 
-    public PanicContactHandler() {
-    }
+	public PanicContactHandler() {
+	}
 
-    public void setPlayer( PanicPlayer player ) {
-        this.player = player;
-    }
+	public void setPlayer(PanicPlayer player) {
+		this.player = player;
+	}
 
-    public void setCollisionState( CollisionState state )
-    {
-        if( state == null ) {
-            this.ed = null;
-            return;
-        }
+	public void setCollisionState(CollisionState state) {
+		if (state == null) {
+			this.ed = null;
+			return;
+		}
 
-        this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
-    }
+		this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
+	}
 
-    protected float getInvMass( Entity e ) {
-        Mass m = ed.getComponent(e.getId(), Mass.class);
-        if( m != null ) {
-            return (float)m.getInvMass();
-        }
-        CollisionShape shape = e.get(CollisionShape.class);
-        if( shape != null ) {
-            return 1.0f/shape.getRadius();
-        }
-        return 0;
-    }
+	protected float getInvMass(Entity e) {
+		Mass m = ed.getComponent(e.getId(), Mass.class);
+		if (m != null) {
+			return (float) m.getInvMass();
+		}
+		return 0;
+	}
 
-    protected void resolveCollision( Entity e1, Entity e2, Vector3f cp, Vector3f cn, float penetration )
-    {
-        Position p1 = e1.get(Position.class);
-        Position p2 = e2.get(Position.class);
-        float invMass1 = getInvMass(e1);
-        float invMass2 = getInvMass(e2);
+	protected void resolveCollision(Entity line, Entity ship, Vector3f cp, Vector3f cn, float penetration) {
+		float invMass1 = getInvMass(line);
+		float invMass2 = getInvMass(ship);
 
-        if( penetration > 0 ) {
-            // Resolve the penetration
-            Vector3f np1 = p1.getLocation().subtract(cn.mult(penetration));
-            Vector3f np2 = p2.getLocation().add(cn.mult(penetration));
-            e1.set(new Position(np1,p1.getFacing()));
-            e2.set(new Position(np2,p2.getFacing()));
-        }
+		Velocity v1 = ed.getComponent(line.getId(), Velocity.class);
+		Vector3f vl1 = v1.getLinear();
+		Velocity v2 = ed.getComponent(ship.getId(), Velocity.class);
+		Vector3f vl2 = v2.getLinear();
 
-        Velocity v1 = ed.getComponent(e1.getId(), Velocity.class);
-        Vector3f vl1 = v1.getLinear();
-        Velocity v2 = ed.getComponent(e2.getId(), Velocity.class);
-        Vector3f vl2 = v2.getLinear();
+		Vector3f vRel = vl2.subtract(vl1);
 
-        Vector3f vRel = vl2.subtract(vl1);
+		float relNormalVel = vRel.dot(cn);
+		if (relNormalVel > 0) {
+			return;
+		}
 
-        float relNormalVel = vRel.dot(cn);
-        if( relNormalVel > 0 ) {
-            // Already separating
-            return;
-        }
+		// Calculate the change in velocity and we'll ignore
+		// penetration for the moment.
+		float restitution = 0.5f;//0.99f;
 
-        // Calculate the change in velocity and we'll ignore
-        // penetration for the moment.
-        float restitution = 0.99f;
+		float impulse = (-(1 + restitution) * relNormalVel) / (invMass1 + invMass2);
 
-        float impulse = (-(1+restitution) * relNormalVel)
-                        / (invMass1 + invMass2);
+		// Apply the impulse to the velocities
+		vl2.addLocal(cn.mult(impulse * invMass2));
+		ship.set(new Velocity(vl2, v2.getAngular()));
+	}
 
-        // Apply the impulse to the velocities
-        vl1.subtractLocal(cn.mult(impulse * invMass1));
-        vl2.addLocal(cn.mult(impulse * invMass2));
+	protected void shipCollision(Entity ship, Entity other, ModelType type, Vector3f cp, Vector3f cn, float penetration) {
+		
+		 Velocity v1 = ed.getComponent(ship.getId(), Velocity.class); Vector3f
+		 vl1 = v1.getLinear(); Velocity v2 = ed.getComponent(other.getId(),
+		 Velocity.class); Vector3f vl2 = v2.getLinear();
+		 
+		 Vector3f vRel = vl1.subtract(vl2);
+		 
+		 float relNormalVel = vRel.dot(cn);
+		 
+		 // Could calculate damage based on relNormalVel 
+		 System.out.println("relNormalVel:" + relNormalVel );
+		 
+		 // Kill the ship
+		 player.setCollision(PanicPlayer.COLLISION_TIME);
+		 ed.removeComponent(ship.getId(), ModelType.class);
+	}
 
-        e1.set(new Velocity(vl1, v1.getAngular()));
-        e2.set(new Velocity(vl2, v2.getAngular()));
-    }
+	public void handleContact(Entity line, Entity circle, Vector3f cp, Vector3f cn, float penetration) {
+		resolveCollision(line, circle, cp, cn, penetration);
 
-    protected void shipCollision( Entity ship, Entity other, ModelType type, Vector3f cp, Vector3f cn, float penetration )
-    {
-    	//ignore for now
-    	
-    	/*
-        Velocity v1 = ed.getComponent(ship.getId(), Velocity.class);
-        Vector3f vl1 = v1.getLinear();
-        Velocity v2 = ed.getComponent(other.getId(), Velocity.class);
-        Vector3f vl2 = v2.getLinear();
+		// Now, if it's a specific kind of collision then we
+		// will do more specific things.
+		ModelType t1 = ed.getComponent(line.getId(), ModelType.class);
+		ModelType t2 = ed.getComponent(circle.getId(), ModelType.class);
+		if (t1 == null || t2 == null) {
+			return;
+		}
 
-        Vector3f vRel = vl1.subtract(vl2);
-
-        float relNormalVel = vRel.dot(cn);
-
-        // If the player is invincible right now then no explosion...
-        if( player.isInvincible() )
-            return;
-
-        // Could calculate damage based on relNormalVel
-        System.out.println( "relNormalVel:" + relNormalVel );
-
-        // Kill the ship
-        player.setDead(true);
-        ed.removeComponent(ship.getId(), ModelType.class);
-
-        // Create some explosive debris from fake asteroids with no
-        // collision shapes
-        int debrisCount = (int)((Math.random() * 5) + 5);
-        float angleOffset = (float)Math.random();
-        for( int i = 0; i < debrisCount; i++ ) {
-            EntityId debris = ed.createEntity();
-            float angle = angleOffset + ((float)i / debrisCount) * FastMath.TWO_PI;
-            float x = FastMath.cos(angle) * 2;
-            float y = FastMath.sin(angle) * 2;
-            float spin = (float)Math.random() * FastMath.PI * 4 - FastMath.PI * 2;
-            ed.setComponents(debris,
-                             new Position(cp, new Quaternion()),
-                             new Velocity(new Vector3f(x,y,0), new Vector3f(0,0,spin)),
-                             new ModelType(PanicModelFactory.MODEL_SHIP_DEBRIS),
-                             new Decay(500));
-        }
-
-        // Make an explosion sound
-        boom1.playInstance();
-        */
-    }
-
-    public void handleContact( Entity e1, Entity e2, Vector3f cp, Vector3f cn, float penetration )
-    {
-    	return;
-    	/* ignore for now
-    	
-        resolveCollision(e1, e2, cp, cn, penetration);
-
-        // Now, if it's a specific kind of collision then we
-        // will do more specific things.
-        ModelType t1 = ed.getComponent(e1.getId(), ModelType.class);
-        ModelType t2 = ed.getComponent(e2.getId(), ModelType.class);
-        if( t1 == null || t2 == null )  {
-            return;
-        }
-
-        if( PanicModelFactory.MODEL_SHIP.equals(t1.getType()) ) {
-            shipCollision(e1, e2, t2, cp, cn, penetration);
-        } else if( PanicModelFactory.MODEL_SHIP.equals(t2.getType()) ) {
-            shipCollision(e2, e1, t1, cp, cn.mult(-1), penetration);
-        } else {
-            // Assume asteroid to asteroid
-
-            // Check the sizes
-            CollisionShape shape1 = e1.get(CollisionShape.class);
-            float r1 = shape1 == null ? 0.01f : shape1.getRadius();
-            CollisionShape shape2 = e2.get(CollisionShape.class);
-            float r2 = shape2 == null ? 0.01f : shape2.getRadius();
-
-            boolean smallImpact = false;
-            if( r1 < 0.3 || r2 < 0.3 ) {
-                smallImpact = true;
-            }
-            if( r1 < 0.6 && r2 < 0.6 ) {
-                smallImpact = true;
-            }
-
-            if( smallImpact ) {
-                bump2.playInstance();
-            } else {
-                bump1.playInstance();
-            }
-        }
-        */
-    }
+		if (PanicModelFactory.MODEL_SHIP.equals(t1.getType())) {
+			shipCollision(line, circle, t2, cp, cn, penetration);
+		}
+	}
 }

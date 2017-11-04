@@ -111,13 +111,12 @@ public class SinglePlayerState extends BaseAppState {
                 setupLevel();
                 break;
             case Starting:
-                resetShip(false, true);
+                resetShip(false);
                 break;
             case Joining:
-                resetShip(true, true);
+                resetShip(true);
                 break;
             case Playing:
-                player.setInvincible(false);
                 break;
             case Death:
             case EndLevel:
@@ -126,49 +125,33 @@ public class SinglePlayerState extends BaseAppState {
         }
     }
 
-    protected void updateState( float tpf ) {
+	protected void updateState(float tpf) {
+		switch (state) {
+		case LoadLevel:
+			setState(GameState.Starting, "Ready...", "Set...", "Go!");
+			break;
+		case Starting:
+			setState(GameState.Joining, "");
+			break;
+		case Joining:
+			setState(GameState.Playing);
+			break;
+		case Playing:
+			break;
+		case Death:
+		case EndLevel:
+		case GameOver:
+			System.out.println("Unknown state: " + state);
+			break;
+		}
+	}
 
-        switch( state ) {
-            case LoadLevel:
-                setState(GameState.Starting, "Ready...", "Set...", "Go!");
-                break;
-            case Starting:
-                setState(GameState.Joining, "");
-                break;
-            case Joining:
-                setState(GameState.Playing);
-                break;
-            case Playing:
-                if( player.isDead() ) {
-                    setState(GameState.Death, "");
-                }
-                break;
-            case Death:
-                if( player.getShipsRemaining() <= 0 ) {
-                    setState(GameState.GameOver, "GAME OVER");
-                } else {
-                    player.addShipsRemaining(-1);
-                    setState(GameState.Starting, "Ready...", "Set...", "Go!");
-                }
-                break;
-            case EndLevel:
-                player.addLevel(1);
-                setState(GameState.LoadLevel);
-                break;
-            case GameOver:
-                getState(MainMenuState.class).setEnabled(true);
-                getStateManager().detach(this);
-                break;
-        }
-    }
-
-    protected void resetShip( boolean mobile, boolean invincible ) {
-        player.setInvincible(invincible);
-        player.setDead(false);
+    protected void resetShip(boolean mobile) {
         ed.setComponents(ship,
                          new ModelType(PanicModelFactory.MODEL_SHIP),
                          new Position(new Vector3f(), new Quaternion()),
-                         new Velocity(new Vector3f(), new Vector3f()),
+                         new Velocity(new Vector3f()),
+                         new Acceleration(new Vector3f()),
                          new Mass(mobile ? 0.1 : 0.0));
         getState(ShipControlState.class).setEnabled(mobile);
     }
@@ -198,9 +181,47 @@ public class SinglePlayerState extends BaseAppState {
         ed.setComponents(ship,
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f(), new Vector3f()),
-                         new CollisionShape(0.1f),
+                         new Acceleration(new Vector3f(), new Vector3f()),
+                         CollisionShape.Circle(0.1f),
                          new Mass(0.1),
                          new ModelType(PanicModelFactory.MODEL_SHIP));
+        
+        EntityId line = ed.createEntity();
+        ed.setComponents(line, 
+        		 new Position(new Vector3f(-0.5f, 1f, 0), new Quaternion()),
+        		 new Velocity(new Vector3f(), new Vector3f()),
+                 CollisionShape.Line(new Vector3f(0.5f, -2f, 0)),
+                 new Mass(10000),
+                 new ModelType(PanicModelFactory.MODEL_WALL));
+        
+        line = ed.createEntity();
+        ed.setComponents(line, 
+        		 new Position(new Vector3f(-3f, -3f, 0), new Quaternion()),
+        		 new Velocity(new Vector3f(), new Vector3f()),
+                 CollisionShape.Line(new Vector3f(0, 6f, 0)),
+                 new Mass(10000),
+                 new ModelType(PanicModelFactory.MODEL_WALL));
+        line = ed.createEntity();
+        ed.setComponents(line, 
+        		 new Position(new Vector3f(-3f, -3f, 0), new Quaternion()),
+        		 new Velocity(new Vector3f(), new Vector3f()),
+                 CollisionShape.Line(new Vector3f(6f, 0f, 0)),
+                 new Mass(10000),
+                 new ModelType(PanicModelFactory.MODEL_WALL));
+        line = ed.createEntity();
+        ed.setComponents(line, 
+        		 new Position(new Vector3f(3f, 3f, 0), new Quaternion()),
+        		 new Velocity(new Vector3f(), new Vector3f()),
+                 CollisionShape.Line(new Vector3f(-6f, 0f, 0)),
+                 new Mass(10000),
+                 new ModelType(PanicModelFactory.MODEL_WALL));
+        line = ed.createEntity();
+        ed.setComponents(line, 
+        		 new Position(new Vector3f(3f, 3f, 0), new Quaternion()),
+        		 new Velocity(new Vector3f(), new Vector3f()),
+                 CollisionShape.Line(new Vector3f(0f, -6f, 0)),
+                 new Mass(10000),
+                 new ModelType(PanicModelFactory.MODEL_WALL));
 
         getStateManager().attach(new ShipControlState(ship));
         getState(ShipControlState.class).setEnabled(false);

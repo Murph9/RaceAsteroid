@@ -61,7 +61,7 @@ public class PhysicsState extends BaseAppState {
     protected void initialize( Application app ) {
 
         ed = getState(EntityDataState.class).getEntityData();
-        entities = ed.getEntities(Position.class, Velocity.class);
+        entities = ed.getEntities(Position.class, Velocity.class, Acceleration.class);
     }
 
     @Override
@@ -103,15 +103,17 @@ public class PhysicsState extends BaseAppState {
         // Make sure we have the latest set but we
         // don't really care who left or joined
         entities.applyChanges();
-        for( Entity e : entities ) {
+        for (Entity e : entities) {
             Position pos = e.get(Position.class);
             Velocity vel = e.get(Velocity.class);
-
-            Vector3f loc = pos.getLocation();
+            Acceleration acc = e.get(Acceleration.class);
+            Vector3f alinear = acc.getLinear();
+            
             Vector3f linear = vel.getLinear();
-            loc = loc.add( (float)(linear.x * tpf),
-                           (float)(linear.y * tpf),
-                           (float)(linear.z * tpf) );
+            linear = linear.addLocal((float)(alinear.x * tpf), (float)(alinear.y * tpf), (float)(alinear.z * tpf));
+            
+            Vector3f loc = pos.getLocation();
+            loc.addLocal((float)(linear.x * tpf), (float)(linear.y * tpf), (float)(linear.z * tpf));
 
             // A little quaternion magic for adding rotational
             // velocity to orientation

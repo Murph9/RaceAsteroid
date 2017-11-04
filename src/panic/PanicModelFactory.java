@@ -40,65 +40,73 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Line;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 
-
 /**
- *  A demo-style model factory that implements AsteroidPanic
- *  visuals as standard JME Box meshes of various colors.
- *  This is not currently used and was just the initial
- *  implementation and is provided for interest.
- *  See RetroPanicModelFactory for the one that is actually
- *  used currently.
+ * A demo-style model factory that implements AsteroidPanic visuals as standard
+ * JME Box meshes of various colors. This is not currently used and was just the
+ * initial implementation and is provided for interest. See
+ * RetroPanicModelFactory for the one that is actually used currently.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class PanicModelFactory implements ModelFactory {
 
-    public static final String MODEL_SHIP = "ship";
-    public static final String MODEL_THRUST = "thrust";
+	public static final String MODEL_SHIP = "ship";
+	public static final String MODEL_THRUST = "thrust";
+	public static final String MODEL_WALL = "wall";
 
-    private ModelState state;
-    private AssetManager assets;
-    private EntityData ed;
+	private ModelState state;
+	private AssetManager assets;
+	private EntityData ed;
 
-    public void setState( ModelState state ) {
-        this.state = state;
-        this.assets = state.getApplication().getAssetManager();
-        this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
-    }
+	public void setState(ModelState state) {
+		this.state = state;
+		this.assets = state.getApplication().getAssetManager();
+		this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
+	}
 
-    public Spatial createModel( Entity e ) {
-        ModelType type = e.get(ModelType.class);
-        if( MODEL_SHIP.equals(type.getType()) ) {
-            CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
-            float radius = cs == null ? 0.1f : cs.getRadius();
+	public Spatial createModel(Entity e) {
+		ModelType type = e.get(ModelType.class);
+		if (MODEL_SHIP.equals(type.getType())) {
+			CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
+			float radius = cs == null ? 0.1f : cs.getRadius();
 
-            Box b = new Box(radius, radius * 1.2f, radius);
-            Geometry geom = new Geometry("Ship", b);
+			Box b = new Box(radius, radius * 1.2f, radius);
+			Geometry geom = new Geometry("Ship", b);
 
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Green);
-            geom.setMaterial(mat);
+			Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", ColorRGBA.Green);
+			geom.setMaterial(mat);
 
-            return geom;
-        } else if( MODEL_THRUST.equals(type.getType()) ) {
-            Box b = new Box(0.5f, 0.5f, 0.5f);
-            Geometry geom = new Geometry("Thrust", b);
+			return geom;
+		} else if (MODEL_THRUST.equals(type.getType())) {
+			Box b = new Box(0.5f, 0.5f, 0.5f);
+			Geometry geom = new Geometry("Thrust", b);
 
-            Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-            mat.setColor("Color", ColorRGBA.Red);
-            geom.setMaterial(mat);
+			Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", ColorRGBA.Red);
+			geom.setMaterial(mat);
 
-            return geom;
-        } else {
-            try {
+			return geom;
+		} else if (MODEL_WALL.equals(type.getType())) {
+			Line u = new Line();
+			Geometry geom = new Geometry("Wall", u);
+
+			Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
+			mat.setColor("Color", ColorRGBA.White);
+			geom.setMaterial(mat);
+
+			return geom;
+		} else {
+			try {
 				throw new Exception("unknown type");
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				return null;
 			}
-        }
-    }
+		}
+	}
 }
