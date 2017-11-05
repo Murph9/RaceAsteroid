@@ -32,39 +32,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
-import com.simsilica.es.EntityComponent;
+import com.simsilica.lemur.core.VersionedHolder;
+import com.simsilica.lemur.core.VersionedReference;
 
 
 /**
- *  Represents a position and orientation of an entity.  This
- *  is a general component that is not necessarily specific to
- *  Asteroid Panic.
+ *  The state of the player: level, score, etc.
  *
  *  @author    Paul Speed
  */
-public class Position implements EntityComponent {
-    private Vector3f location;
-    private Quaternion facing;
+public class PanicPlayer {
 
-    public Position( Vector3f location, Quaternion facing ) {
-        this.location = location;
-        this.facing = facing;
+	public static final float COLLISION_TIME = 1;
+	
+    private VersionedHolder<Integer> level = new VersionedHolder<Integer>(1);
+    private VersionedHolder<Integer> score = new VersionedHolder<Integer>(0);
+    private VersionedHolder<Integer> shipsRemaining = new VersionedHolder<Integer>(0);
+
+    private float collision = 0;
+
+    public PanicPlayer( int ships ) {
+        shipsRemaining.setObject(ships);
     }
 
-    public Vector3f getLocation() {
-        return location;
+    public void setCollision(float set) {
+    	collision = set;
+    }
+    public float getCollision() {
+    	return collision;
+    }
+    
+    public VersionedReference<Integer> getLevelRef() {
+        return level.createReference();
     }
 
-    public Quaternion getFacing() {
-        return facing;
+    public VersionedReference<Integer> getScoreRef() {
+        return score.createReference();
     }
 
-    @Override
-    public String toString() {
-        return "Position[" + location + ", " + facing + "]";
+    public VersionedReference<Integer> getShipsRemainingRef() {
+        return shipsRemaining.createReference();
     }
 }
+

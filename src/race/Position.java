@@ -32,20 +32,39 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
-import com.jme3.scene.Spatial;
-import com.simsilica.es.Entity;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
+import com.simsilica.es.EntityComponent;
 
 
 /**
- *  Called by the ModelState to create new Spatials when
- *  required.
+ *  Represents a position and orientation of an entity.  This
+ *  is a general component that is not necessarily specific to
+ *  Asteroid Panic.
  *
  *  @author    Paul Speed
  */
-public interface ModelFactory {
+public class Position implements EntityComponent {
+    private Vector3f location;
+    private Quaternion facing;
 
-    public void setState( ModelState state );
-    public Spatial createModel( Entity e );
+    public Position( Vector3f location, Quaternion facing ) {
+        this.location = location;
+        this.facing = facing;
+    }
+
+    public Vector3f getLocation() {
+        return location;
+    }
+
+    public Quaternion getFacing() {
+        return facing;
+    }
+
+    @Override
+    public String toString() {
+        return "Position[" + location + ", " + facing + "]";
+    }
 }

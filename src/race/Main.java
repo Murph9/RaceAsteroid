@@ -32,33 +32,56 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
-import com.simsilica.es.EntityComponent;
+import com.jme3.app.SimpleApplication;
+import com.jme3.renderer.RenderManager;
+import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.style.Styles;
 
 /**
- *  Represents a time-to-live for an entity.
+ *  Application entry point.  Sets up the game app states and
+ *  initializes the GUI sub-system, styles, and the default
+ *  control mappings.
  *
- *  @author    Paul Speed
+ *  @author Paul Speed
  */
-public class Decay implements EntityComponent {
-    private long start;
-    private long delta;
+public class Main extends SimpleApplication {
 
-    public Decay( long deltaMillis ) {
-        this.start = System.nanoTime();
-        this.delta = deltaMillis * 1000000;
+    public static void main(String[] args) {
+        Main app = new Main();
+        app.setShowSettings(false);
+        app.start();
     }
 
-    public double getPercent() {
-        long time = System.nanoTime();
-        return (double)(time - start)/delta;
+    public Main() {
+        super(new EntityDataState(),
+               new PhysicsState(),
+               new CollisionState(new PanicContactHandler()),
+               new DecayState(),
+               new ModelState(new RetroPanicModelFactory()),
+               new MainMenuState());
     }
 
     @Override
-    public String toString() {
-        return "Decay[" + (delta/1000000.0) + " ms]";
+    public void simpleInitApp() {
+
+        // Initialize the Lemur helper instance
+        GuiGlobals.initialize(this);
+
+        // Setup default key mappings
+        ShipFunctions.initializeDefaultMappings(GuiGlobals.getInstance().getInputMapper());
+
+        // Setup the "retro" style for our HUD and GUI elements
+        Styles styles = GuiGlobals.getInstance().getStyles();
+        PanicStyles.initializeStyles(styles);
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+    }
+
+    @Override
+    public void simpleRender(RenderManager rm) {
     }
 }
-
-

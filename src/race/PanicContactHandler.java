@@ -32,7 +32,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;

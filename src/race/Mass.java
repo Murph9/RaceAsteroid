@@ -32,18 +32,37 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
-import com.jme3.math.Vector3f;
-import com.simsilica.es.Entity;
+import com.simsilica.es.EntityComponent;
+
 
 /**
- * Called by the CollisionState to handle generated contacts/collisions.
+ *  Represents the mass of an entity.  A mass of 0 is
+ *  for static objects... or infinite mass.
  *
- * @author Paul Speed
+ *  @author    Paul Speed
  */
-public interface ContactHandler {
-	public void setCollisionState(CollisionState state);
+public class Mass implements EntityComponent
+{
+    private double mass;
+    private double invMass;
 
-	public void handleContact(Entity line, Entity circle, Vector3f cp, Vector3f cn, float penetration);
+    public Mass( double mass ) {
+        this.mass = mass;
+        this.invMass = mass == 0 ? 0 : 1.0/mass;
+    }
+
+    public double getMass() {
+        return mass;
+    }
+
+    public double getInvMass() {
+        return invMass;
+    }
+
+    @Override
+    public String toString() {
+        return "Mass[" + mass + "]";
+    }
 }

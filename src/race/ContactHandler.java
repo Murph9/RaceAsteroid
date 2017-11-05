@@ -32,56 +32,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.renderer.RenderManager;
-import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.style.Styles;
+import com.jme3.math.Vector3f;
+import com.simsilica.es.Entity;
 
 /**
- *  Application entry point.  Sets up the game app states and
- *  initializes the GUI sub-system, styles, and the default
- *  control mappings.
+ * Called by the CollisionState to handle generated contacts/collisions.
  *
- *  @author Paul Speed
+ * @author Paul Speed
  */
-public class Main extends SimpleApplication {
+public interface ContactHandler {
+	public void setCollisionState(CollisionState state);
 
-    public static void main(String[] args) {
-        Main app = new Main();
-        app.setShowSettings(false);
-        app.start();
-    }
-
-    public Main() {
-        super(new EntityDataState(),
-               new PhysicsState(),
-               new CollisionState(new PanicContactHandler()),
-               new DecayState(),
-               new ModelState(new RetroPanicModelFactory()),
-               new MainMenuState());
-    }
-
-    @Override
-    public void simpleInitApp() {
-
-        // Initialize the Lemur helper instance
-        GuiGlobals.initialize(this);
-
-        // Setup default key mappings
-        ShipFunctions.initializeDefaultMappings(GuiGlobals.getInstance().getInputMapper());
-
-        // Setup the "retro" style for our HUD and GUI elements
-        Styles styles = GuiGlobals.getInstance().getStyles();
-        PanicStyles.initializeStyles(styles);
-    }
-
-    @Override
-    public void simpleUpdate(float tpf) {
-    }
-
-    @Override
-    public void simpleRender(RenderManager rm) {
-    }
+	public void handleContact(Entity line, Entity circle, Vector3f cp, Vector3f cn, float penetration);
 }

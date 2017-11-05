@@ -32,51 +32,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
-import com.jme3.app.Application;
-import com.simsilica.es.EntityData;
-import com.simsilica.es.base.DefaultEntityData;
-import com.simsilica.lemur.event.BaseAppState;
+import com.simsilica.es.EntityComponent;
 
 
 /**
- *  AppState providing convenient access to the global
- *  ES entity data.  It also properly cleans up the ES
- *  upon termination.
+ *  A general "model type" used for entities with a visual
+ *  display.  This is not Asteroid Panic specific and could
+ *  be used for any game that directly maps models to entities.
  *
  *  @author    Paul Speed
  */
-public class EntityDataState extends BaseAppState {
-    private EntityData entityData;
+public class ModelType implements EntityComponent {
+    private String type;
 
-    public EntityDataState() {
-        this(new DefaultEntityData());
+    public ModelType( String type ) {
+        this.type = type;
     }
 
-    public EntityDataState( EntityData ed ) {
-        this.entityData = ed;
+    public String getType() {
+        return type;
     }
 
-    public EntityData getEntityData() {
-        return entityData;
-    }
-
-    @Override
-    protected void initialize( Application app ) {
-    }
-
-    @Override
-    protected void cleanup( Application app ) {
-        entityData.close();
-        entityData = null; // cannot be reused
-    }
-
-    @Override
-    protected void enable() {
-    }
-
-    @Override
-    protected void disable() {
+    public String toString() {
+        return "ModelType[" + type + "]";
     }
 }

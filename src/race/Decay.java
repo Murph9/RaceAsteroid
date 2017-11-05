@@ -32,60 +32,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package panic;
+package race;
 
-import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityComponent;
 
-
 /**
- *  Direction and magnitude of line.
- *  Start is the position of the object
+ *  Represents a time-to-live for an entity.
  *
- *  @author    murph
+ *  @author    Paul Speed
  */
-public class CollisionShape implements EntityComponent
-{
-	private final static String TYPE_CIRCLE = "circle";
-	private final static String TYPE_LINE = "line";
-	
-	private String type;
-	private Vector3f dir;
-	private float radius;
-	
-	public static CollisionShape Line(Vector3f dir) {
-		return new CollisionShape(TYPE_LINE, dir, 0);
-	}
-	public static CollisionShape Circle(float radius) {
-		return new CollisionShape(TYPE_CIRCLE, null, radius);
-	}
-	
-	private CollisionShape(String type, Vector3f dir, float radius) {
-		this.type = type;
-		this.dir = dir;
-		this.radius = radius;
-	}
+public class Decay implements EntityComponent {
+    private long start;
+    private long delta;
 
-    public Vector3f getDir() {
-    	if (!type.equals(TYPE_LINE)) {
-			try {
-				throw new Exception("Not valid for type: " + type);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
-    	}
-        return dir;
+    public Decay( long deltaMillis ) {
+        this.start = System.nanoTime();
+        this.delta = deltaMillis * 1000000;
     }
-    public float getRadius() {
-    	if (!type.equals(TYPE_CIRCLE)) {
-			try {
-				throw new Exception("Not valid for type: " + type);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return Float.NaN;
-			}
-    	}
-        return radius;
+
+    public double getPercent() {
+        long time = System.nanoTime();
+        return (double)(time - start)/delta;
+    }
+
+    @Override
+    public String toString() {
+        return "Decay[" + (delta/1000000.0) + " ms]";
     }
 }
+
+
