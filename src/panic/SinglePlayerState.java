@@ -165,7 +165,7 @@ public class SinglePlayerState extends BaseAppState {
     }
 
     @Override
-    protected void initialize( Application app ) {
+    protected void initialize(Application app) {
 
         // The player has the ship they are playing and 2
         // extra in reserve to start with.
@@ -173,7 +173,7 @@ public class SinglePlayerState extends BaseAppState {
 
         PanicContactHandler contactHandler
                 = (PanicContactHandler)getState(CollisionState.class).getContactHandler();
-        contactHandler.setPlayer( player );
+        contactHandler.setPlayer(player);
 
         ed = getState(EntityDataState.class).getEntityData();
 
@@ -230,18 +230,18 @@ public class SinglePlayerState extends BaseAppState {
     }
 
     @Override
-    protected void cleanup( Application app ) {
-        if (asteroids != null)
-        	asteroids.release();
-        asteroids = null;
-        getStateManager().detach(getState(ShipControlState.class));
-    }
+	protected void cleanup(Application app) {
+		if (asteroids != null)
+			asteroids.release();
+		asteroids = null;
+		getStateManager().detach(getState(ShipControlState.class));
+	}
 
-    @Override
-    protected void enable() {
-    }
+	@Override
+	protected void enable() {
+	}
 
-    @Override
-    protected void disable() {
-    }
+	@Override
+	protected void disable() {
+	}
 }

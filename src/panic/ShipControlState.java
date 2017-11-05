@@ -37,8 +37,10 @@ package panic;
 import com.jme3.app.Application;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
+import com.simsilica.es.EntitySet;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.event.BaseAppState;
 import com.simsilica.lemur.input.AnalogFunctionListener;
@@ -109,6 +111,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 			Position pos = ed.getComponent(ship, Position.class);
 			accel.set(0, (float) (ACCEL_VALUE * value), 0);
+			accel.mult(behindShipScale());
 			accel = pos.getFacing().multLocal(accel); // quaternion multlocal applies to the vector
 
 			lastThrustTime += tpf;
@@ -116,13 +119,15 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 				lastThrustTime = 0;
 
-				// Create a thrust entity (TODO push out making a bell curve
-				// shape)
+				// Create a thrust entity (TODO push out making a bell curve shape)
 				EntityId thrust = ed.createEntity();
 				Vector3f thrustVel = accel.mult(-2);
 				Vector3f thrustPos = pos.getLocation().add(thrustVel.normalize().multLocal(0.1f));
-				ed.setComponents(thrust, new Position(thrustPos, new Quaternion()), new Velocity(thrustVel),
-						new Acceleration(new Vector3f()), new ModelType(PanicModelFactory.MODEL_THRUST),
+				ed.setComponents(thrust, 
+						new Position(thrustPos, new Quaternion()), 
+						new Velocity(thrustVel),
+						new Acceleration(new Vector3f()), 
+						new ModelType(PanicModelFactory.MODEL_THRUST),
 						new Decay(1000));
 
 			} else if (value == 0) {
@@ -131,6 +136,27 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		}
 	}
 
+	private float behindShipScale() {
+		Vector3f rayStart = ed.getComponent(ship, Position.class).getLocation();
+		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0,-1,0));
+		
+		EntitySet entities = ed.getEntities(CollisionShape.class);
+		float minDist = 1;
+		for (Entity entity: entities) {
+			ModelType type = ed.getComponent(entity.getId(), ModelType.class);
+			if (PanicModelFactory.MODEL_WALL.equals(type.getType())) {
+				Vector3f p = ed.getComponent(entity.getId(), Position.class).getLocation();
+				Vector3f r = ed.getComponent(entity.getId(), CollisionShape.class).getDir();
+				
+				H.IntersectResult result = H.linesIntersectV3(rayStart, rayStart.add(rayDir), p, p.add(r));
+				if (result.success)
+					minDist = Math.min(minDist, result.t);
+			}
+		}
+		
+		return 1/(minDist*minDist);
+	}
+	
 	public void valueChanged(FunctionId func, InputState value, double tpf) {
 	}
 

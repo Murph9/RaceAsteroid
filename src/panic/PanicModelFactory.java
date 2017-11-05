@@ -57,6 +57,7 @@ public class PanicModelFactory implements ModelFactory {
 	public static final String MODEL_SHIP = "ship";
 	public static final String MODEL_THRUST = "thrust";
 	public static final String MODEL_WALL = "wall";
+	public static final String MODEL_COL_WALL = "col_wall";
 
 	private ModelState state;
 	private AssetManager assets;
@@ -91,7 +92,7 @@ public class PanicModelFactory implements ModelFactory {
 			geom.setMaterial(mat);
 
 			return geom;
-		} else if (MODEL_WALL.equals(type.getType())) {
+		} else if (MODEL_WALL.equals(type.getType()) || MODEL_COL_WALL.equals(type.getType())) {
 			Line u = new Line();
 			Geometry geom = new Geometry("Wall", u);
 

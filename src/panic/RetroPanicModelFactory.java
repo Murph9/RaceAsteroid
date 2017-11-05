@@ -60,6 +60,7 @@ public class RetroPanicModelFactory implements ModelFactory {
     public static final String MODEL_SHIP = "ship";
     public static final String MODEL_THRUST = "thrust";
     public static final String MODEL_WALL = "wall";
+    public static final String MODEL_COL_WALL = "col_wall";
 
     private ModelState state;
     private AssetManager assets;
@@ -127,7 +128,7 @@ public class RetroPanicModelFactory implements ModelFactory {
             return createSprite("Ship", radius * 4, ColorRGBA.Cyan, 0, 7);
         } else if( MODEL_THRUST.equals(type.getType()) ) {
             return createSprite("Thrust", 0.5f, ColorRGBA.Red, 0, 5);
-        } else if (MODEL_WALL.equals(type.getType())) {
+        } else if (MODEL_WALL.equals(type.getType()) || MODEL_COL_WALL.equals(type.getType())) {
         	return createLine("Wall", ed.getComponent(e.getId(), CollisionShape.class).getDir(), ColorRGBA.White);
         } else {
             try {
