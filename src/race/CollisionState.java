@@ -102,15 +102,15 @@ public class CollisionState extends BaseAppState {
 		
 		// only handles collision between circle and line elements
 		// so find out which one is which:
-		if (PanicModelFactory.MODEL_SHIP.equals(t1.getType())) {
-			if (!PanicModelFactory.MODEL_WALL.equals(t2.getType())) {
+		if (RetroPanicModelFactory.MODEL_SHIP.equals(t1.getType())) {
+			if (!RetroPanicModelFactory.MODEL_WALL.equals(t2.getType())) {
 				return;
 			}
 			//ship is 1, line is 2
 			generateContactsLineCircle(e2, e1);
 		
-		} else if (PanicModelFactory.MODEL_SHIP.equals(t2.getType())) {
-			if (!PanicModelFactory.MODEL_WALL.equals(t1.getType())) {
+		} else if (RetroPanicModelFactory.MODEL_SHIP.equals(t2.getType())) {
+			if (!RetroPanicModelFactory.MODEL_WALL.equals(t1.getType())) {
 				return;
 			}
 			//ship is 2, line is 1

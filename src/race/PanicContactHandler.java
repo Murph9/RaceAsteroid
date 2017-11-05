@@ -92,8 +92,7 @@ public class PanicContactHandler implements ContactHandler {
 			return;
 		}
 
-		// Calculate the change in velocity and we'll ignore
-		// penetration for the moment.
+		// Calculate the change in velocity and we ignore penetration
 		float restitution = 0.5f;//0.99f;
 
 		float impulse = (-(1 + restitution) * relNormalVel) / (invMass1 + invMass2);
@@ -103,37 +102,7 @@ public class PanicContactHandler implements ContactHandler {
 		ship.set(new Velocity(vl2, v2.getAngular()));
 	}
 
-	protected void shipCollision(Entity ship, Entity other, ModelType type, Vector3f cp, Vector3f cn, float penetration) {
-		
-		 Velocity v1 = ed.getComponent(ship.getId(), Velocity.class); Vector3f
-		 vl1 = v1.getLinear(); Velocity v2 = ed.getComponent(other.getId(),
-		 Velocity.class); Vector3f vl2 = v2.getLinear();
-		 
-		 Vector3f vRel = vl1.subtract(vl2);
-		 
-		 float relNormalVel = vRel.dot(cn);
-		 
-		 // Could calculate damage based on relNormalVel 
-		 System.out.println("relNormalVel:" + relNormalVel );
-		 
-		 // Kill the ship
-		 player.setCollision(PanicPlayer.COLLISION_TIME);
-		 ed.removeComponent(ship.getId(), ModelType.class);
-	}
-
 	public void handleContact(Entity line, Entity circle, Vector3f cp, Vector3f cn, float penetration) {
 		resolveCollision(line, circle, cp, cn, penetration);
-
-		// Now, if it's a specific kind of collision then we
-		// will do more specific things.
-		ModelType t1 = ed.getComponent(line.getId(), ModelType.class);
-		ModelType t2 = ed.getComponent(circle.getId(), ModelType.class);
-		if (t1 == null || t2 == null) {
-			return;
-		}
-
-		if (PanicModelFactory.MODEL_SHIP.equals(t1.getType())) {
-			shipCollision(line, circle, t2, cp, cn, penetration);
-		}
 	}
 }

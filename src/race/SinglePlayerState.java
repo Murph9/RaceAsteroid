@@ -39,7 +39,6 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
-import com.simsilica.es.EntitySet;
 import com.simsilica.lemur.event.BaseAppState;
 
 
@@ -87,7 +86,6 @@ public class SinglePlayerState extends BaseAppState {
     */
 
     private EntityData ed;
-    private EntitySet asteroids;
 
     private PanicPlayer player;
     private EntityId    ship;
@@ -97,8 +95,8 @@ public class SinglePlayerState extends BaseAppState {
     public SinglePlayerState() {
     }
 
-    protected void setState( GameState state, String... titles ) {
-        if( state == this.state ) {
+	protected void setState(GameState state) {
+		if (state == this.state) {
             return;
         }
         this.state = state;
@@ -128,10 +126,9 @@ public class SinglePlayerState extends BaseAppState {
 	protected void updateState(float tpf) {
 		switch (state) {
 		case LoadLevel:
-			setState(GameState.Starting, "Ready...", "Set...", "Go!");
-			break;
+			setState(GameState.Starting);
 		case Starting:
-			setState(GameState.Joining, "");
+			setState(GameState.Joining);
 			break;
 		case Joining:
 			setState(GameState.Playing);
@@ -148,7 +145,7 @@ public class SinglePlayerState extends BaseAppState {
 
     protected void resetShip(boolean mobile) {
         ed.setComponents(ship,
-                         new ModelType(PanicModelFactory.MODEL_SHIP),
+                         new ModelType(RetroPanicModelFactory.MODEL_SHIP),
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f()),
                          new Acceleration(new Vector3f()),
@@ -182,58 +179,21 @@ public class SinglePlayerState extends BaseAppState {
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f(), new Vector3f()),
                          new Acceleration(new Vector3f(), new Vector3f()),
+                         new Drag(0.8f),
                          CollisionShape.Circle(0.1f),
                          new Mass(0.1),
-                         new ModelType(PanicModelFactory.MODEL_SHIP));
+                         new ModelType(RetroPanicModelFactory.MODEL_SHIP));
         
-        EntityId line = ed.createEntity();
-        ed.setComponents(line, 
-        		 new Position(new Vector3f(-0.5f, 1f, 0), new Quaternion()),
-        		 new Velocity(new Vector3f(), new Vector3f()),
-                 CollisionShape.Line(new Vector3f(0.5f, -2f, 0)),
-                 new Mass(10000),
-                 new ModelType(PanicModelFactory.MODEL_WALL));
-        
-        line = ed.createEntity();
-        ed.setComponents(line, 
-        		 new Position(new Vector3f(-3f, -3f, 0), new Quaternion()),
-        		 new Velocity(new Vector3f(), new Vector3f()),
-                 CollisionShape.Line(new Vector3f(0, 6f, 0)),
-                 new Mass(10000),
-                 new ModelType(PanicModelFactory.MODEL_WALL));
-        line = ed.createEntity();
-        ed.setComponents(line, 
-        		 new Position(new Vector3f(-3f, -3f, 0), new Quaternion()),
-        		 new Velocity(new Vector3f(), new Vector3f()),
-                 CollisionShape.Line(new Vector3f(6f, 0f, 0)),
-                 new Mass(10000),
-                 new ModelType(PanicModelFactory.MODEL_WALL));
-        line = ed.createEntity();
-        ed.setComponents(line, 
-        		 new Position(new Vector3f(3f, 3f, 0), new Quaternion()),
-        		 new Velocity(new Vector3f(), new Vector3f()),
-                 CollisionShape.Line(new Vector3f(-6f, 0f, 0)),
-                 new Mass(10000),
-                 new ModelType(PanicModelFactory.MODEL_WALL));
-        line = ed.createEntity();
-        ed.setComponents(line, 
-        		 new Position(new Vector3f(3f, 3f, 0), new Quaternion()),
-        		 new Velocity(new Vector3f(), new Vector3f()),
-                 CollisionShape.Line(new Vector3f(0f, -6f, 0)),
-                 new Mass(10000),
-                 new ModelType(PanicModelFactory.MODEL_WALL));
+        World.generate(ed);
 
         getStateManager().attach(new ShipControlState(ship));
         getState(ShipControlState.class).setEnabled(false);
 
-        setState(GameState.LoadLevel, "PLAYER 1 UP");
+        setState(GameState.LoadLevel);
     }
 
     @Override
 	protected void cleanup(Application app) {
-		if (asteroids != null)
-			asteroids.release();
-		asteroids = null;
 		getStateManager().detach(getState(ShipControlState.class));
 	}
 

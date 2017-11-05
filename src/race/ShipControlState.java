@@ -50,11 +50,9 @@ import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
 
 /**
- * Maps player input into ship control. Note: this state takes over the job of
- * applying acceleration to the ship's velocity. This could easily be moved into
- * the physics system by adding an Acceleration component.
+ * Maps player input into ship control.
  *
- * @author Paul Speed
+ * @author Paul Speed (modified by murph)
  */
 public class ShipControlState extends BaseAppState implements AnalogFunctionListener, StateFunctionListener {
 
@@ -62,7 +60,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private EntityId ship;
 
 	private static final float rotateSpeed = 3;
-	private static final float ACCEL_VALUE = 1;
+	private static final float ACCEL_VALUE = 3;
 
 	private double lastThrustTime = 0.1;
 	private double thrustInterval = 0.1;
@@ -127,7 +125,8 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
 						new Acceleration(new Vector3f()), 
-						new ModelType(PanicModelFactory.MODEL_THRUST),
+						new Drag(0.5f),
+						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
 						new Decay(1000));
 
 			} else if (value == 0) {
@@ -144,7 +143,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		float minDist = 1;
 		for (Entity entity: entities) {
 			ModelType type = ed.getComponent(entity.getId(), ModelType.class);
-			if (PanicModelFactory.MODEL_WALL.equals(type.getType())) {
+			if (RetroPanicModelFactory.MODEL_WALL.equals(type.getType())) {
 				Vector3f p = ed.getComponent(entity.getId(), Position.class).getLocation();
 				Vector3f r = ed.getComponent(entity.getId(), CollisionShape.class).getDir();
 				
