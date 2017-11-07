@@ -27,4 +27,6 @@ public class World {
 	                 new ModelType(RetroPanicModelFactory.MODEL_WALL));
     	}	
 	}
+	
+	//TODO Make into an appstate probs
 }

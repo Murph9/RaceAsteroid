@@ -59,7 +59,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private EntityData ed;
 	private EntityId ship;
 
-	private static final float rotateSpeed = 3;
+	private static final float ROTATE_SPEED = 3;
 	private static final float ACCEL_VALUE = 3;
 
 	private double lastThrustTime = 0.1;
@@ -103,7 +103,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		if (func == ShipFunctions.F_TURN) {
 
 			Velocity vel = ed.getComponent(ship, Velocity.class);
-			float rotate = (float) (value * rotateSpeed);
+			float rotate = (float) (value * ROTATE_SPEED);
 			ed.setComponent(ship, new Velocity(vel.getLinear(), new Vector3f(0, 0, rotate)));
 		} else if (func == ShipFunctions.F_THRUST) {
 
@@ -117,7 +117,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 				lastThrustTime = 0;
 
-				// Create a thrust entity (TODO push out making a bell curve shape)
+				// Create a thrust entity (TODO push out making a bell curve shape || or texture..)
 				EntityId thrust = ed.createEntity();
 				Vector3f thrustVel = accel.mult(-2);
 				Vector3f thrustPos = pos.getLocation().add(thrustVel.normalize().multLocal(0.1f));

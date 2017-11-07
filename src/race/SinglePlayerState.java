@@ -51,44 +51,10 @@ import com.simsilica.lemur.event.BaseAppState;
  */
 public class SinglePlayerState extends BaseAppState {
 
-    protected enum GameState { LoadLevel, Starting, Joining, Playing, Death, EndLevel, GameOver };
-
-    /*
-        States break down as follows
-        1) LoadLevel
-            init: Setup asteroids for current player level
-            update: show messages until done
-                -go to Starting
-        2) Starting
-            init: reset ship, invincible and unmoveable
-            update: show messages until done
-                -go to Joining
-        3) Joining
-            init: reset ship, invincible, moveable
-            update: when delay is done
-                -go to Playing
-        4) Playing
-            init: ship invincible = false
-            update: check for asteroids = 0
-                        -go to EndLevel
-                    check for death
-                        -go to Death
-        5) Death
-            init: check for ships remaining
-                    -go to Starting or GameOver
-        6) EndLevel
-            init:
-            update: show messages until done
-                -increment level
-                -go to LoadLevel
-        7) GameOver
-            init: message
-    */
+    protected enum GameState { LoadLevel, Joining, Playing, Death, EndLevel, GameOver };
 
     private EntityData ed;
-
-    private PanicPlayer player;
-    private EntityId    ship;
+    private EntityId ship;
 
     private GameState state = GameState.GameOver;
 
@@ -104,30 +70,25 @@ public class SinglePlayerState extends BaseAppState {
     }
 
     protected void initState() {
-        switch( state ) {
-            case LoadLevel:
-                setupLevel();
-                break;
-            case Starting:
-                resetShip(false);
-                break;
-            case Joining:
-                resetShip(true);
-                break;
-            case Playing:
-                break;
-            case Death:
-            case EndLevel:
-            case GameOver:
-                break;
-        }
+		switch (state) {
+		case LoadLevel:
+			setupLevel();
+			break;
+		case Joining:
+			resetShip(true);
+			break;
+		case Playing:
+			break;
+		case Death:
+		case EndLevel:
+		case GameOver:
+			break;
+		}
     }
 
 	protected void updateState(float tpf) {
 		switch (state) {
 		case LoadLevel:
-			setState(GameState.Starting);
-		case Starting:
 			setState(GameState.Joining);
 			break;
 		case Joining:
@@ -151,6 +112,7 @@ public class SinglePlayerState extends BaseAppState {
                          new Acceleration(new Vector3f()),
                          new Mass(mobile ? 0.1 : 0.0));
         getState(ShipControlState.class).setEnabled(mobile);
+        getState(ShipCamera.class).setEnabled(mobile);
     }
 
     protected void setupLevel() {
@@ -163,14 +125,6 @@ public class SinglePlayerState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-
-        // The player has the ship they are playing and 2
-        // extra in reserve to start with.
-        this.player = new PanicPlayer(2);
-
-        PanicContactHandler contactHandler
-                = (PanicContactHandler)getState(CollisionState.class).getContactHandler();
-        contactHandler.setPlayer(player);
 
         ed = getState(EntityDataState.class).getEntityData();
 
@@ -188,19 +142,21 @@ public class SinglePlayerState extends BaseAppState {
 
         getStateManager().attach(new ShipControlState(ship));
         getState(ShipControlState.class).setEnabled(false);
-
+        getStateManager().attach(new ShipCamera(ship));
+        getState(ShipCamera.class).setEnabled(false);
+        
         setState(GameState.LoadLevel);
     }
 
     @Override
 	protected void cleanup(Application app) {
 		getStateManager().detach(getState(ShipControlState.class));
+		getStateManager().detach(getState(ShipCamera.class));
 	}
 
 	@Override
 	protected void enable() {
 	}
-
 	@Override
 	protected void disable() {
 	}

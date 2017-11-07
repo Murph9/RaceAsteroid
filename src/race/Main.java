@@ -51,6 +51,7 @@ public class Main extends SimpleApplication {
     public static void main(String[] args) {
         Main app = new Main();
         app.setShowSettings(false);
+        app.flyCam = null;
         app.start();
     }
 

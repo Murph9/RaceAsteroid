@@ -50,13 +50,8 @@ import com.simsilica.es.EntityData;
 public class PanicContactHandler implements ContactHandler {
 
 	private EntityData ed;
-	private PanicPlayer player;
 
 	public PanicContactHandler() {
-	}
-
-	public void setPlayer(PanicPlayer player) {
-		this.player = player;
 	}
 
 	public void setCollisionState(CollisionState state) {

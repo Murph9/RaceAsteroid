@@ -34,27 +34,13 @@
 
 package race;
 
-import com.simsilica.lemur.core.VersionedHolder;
-import com.simsilica.lemur.core.VersionedReference;
-
-
-/**
- *  The state of the player: level, score, etc.
- *
- *  @author    Paul Speed
- */
 public class PanicPlayer {
 
 	public static final float COLLISION_TIME = 1;
 	
-    private VersionedHolder<Integer> level = new VersionedHolder<Integer>(1);
-    private VersionedHolder<Integer> score = new VersionedHolder<Integer>(0);
-    private VersionedHolder<Integer> shipsRemaining = new VersionedHolder<Integer>(0);
-
     private float collision = 0;
 
     public PanicPlayer( int ships ) {
-        shipsRemaining.setObject(ships);
     }
 
     public void setCollision(float set) {
@@ -62,18 +48,6 @@ public class PanicPlayer {
     }
     public float getCollision() {
     	return collision;
-    }
-    
-    public VersionedReference<Integer> getLevelRef() {
-        return level.createReference();
-    }
-
-    public VersionedReference<Integer> getScoreRef() {
-        return score.createReference();
-    }
-
-    public VersionedReference<Integer> getShipsRemainingRef() {
-        return shipsRemaining.createReference();
     }
 }
 
