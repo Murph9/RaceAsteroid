@@ -5,14 +5,16 @@ import com.simsilica.es.EntityComponent;
 
 public class Drag implements EntityComponent {
 
+	private float linear;
 	private float drag;
 
-	public Drag(float drag) {
+	public Drag(float linear, float drag) {
+		this.linear = linear;
 		this.drag = drag;
 	}
 
 	public Vector3f getDrag(Vector3f vel) {
-		return vel.mult(vel.length()*-drag);
+		return vel.mult(vel.length()*-drag).add(vel.mult(-linear));
 	}
 
 	@Override

@@ -179,7 +179,7 @@ public class SinglePlayerState extends BaseAppState {
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f(), new Vector3f()),
                          new Acceleration(new Vector3f(), new Vector3f()),
-                         new Drag(0.8f),
+                         new Drag(0.2f, 0.25f),
                          CollisionShape.Circle(0.1f),
                          new Mass(0.1),
                          new ModelType(RetroPanicModelFactory.MODEL_SHIP));

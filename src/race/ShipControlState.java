@@ -125,9 +125,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
 						new Acceleration(new Vector3f()), 
-						new Drag(0.5f),
+						new Drag(3f, 4f),
 						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
-						new Decay(1000));
+						new Decay(300));
 
 			} else if (value == 0) {
 				lastThrustTime = thrustInterval;
