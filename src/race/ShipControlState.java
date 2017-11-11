@@ -53,20 +53,21 @@ import com.simsilica.lemur.input.StateFunctionListener;
 /**
  * Maps player input into ship control.
  *
- * @author Paul Speed (modified by murph)
+ * @author Paul Speed (modified a lot by murph)
  */
 public class ShipControlState extends BaseAppState implements AnalogFunctionListener, StateFunctionListener {
 
 	private EntityData ed;
 	private EntityId ship;
-
+	
 	private static final float ROTATE_SPEED = 4;
+	public static final long COLLISION_STUN_TIME = 400;
 	
 	private static final float RAY_CAST_LENGTH = 1.3f;
 	private static final float ACCEL_VALUE = 3;
 	
-	private static final float WALL_SCALE = 5;
-	private static final float WALL_SCALE_2 = 3.3f;
+	private static final float WALL_SCALE = 6.56f;
+	private static final float WALL_SCALE_2 = 2.1f;
 
 	private static final float THRUST_INTERVAL = 0.05f;
 	private float lastThrustTime = 0.1f;
@@ -80,7 +81,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	@Override
 	protected void initialize(Application app) {
 		ed = getState(EntityDataState.class).getEntityData();
-
+		
 		InputMapper inputMapper = GuiGlobals.getInstance().getInputMapper();
 		inputMapper.addAnalogListener(this, ShipFunctions.F_TURN, ShipFunctions.F_THRUST);
 		inputMapper.addStateListener(this, ShipFunctions.F_THRUST);
@@ -112,15 +113,20 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			float rotate = (float) (value * ROTATE_SPEED);
 			ed.setComponent(ship, new Velocity(vel.getLinear(), new Vector3f(0, 0, rotate)));
 		} else if (func == ShipFunctions.F_THRUST) {
-
+			
 			Position pos = ed.getComponent(ship, Position.class);
 			accel.set(0, (float) (ACCEL_VALUE * value), 0);
 			float scale = behindShipScale();
 			accel.multLocal(scale);
 			accel = pos.getFacing().multLocal(accel); // quaternion multlocal applies to the vector
 			
+			//wall collision creates stun effect
+			Stun s = ed.getComponent(ship, Stun.class);
+            if (s.getPercent() <= 1.0)
+                accel.set(0, 0, 0);
+			
 			lastThrustTime += tpf;
-			if (value != 0 && lastThrustTime >= THRUST_INTERVAL) {
+			if (value != 0 && lastThrustTime >= THRUST_INTERVAL && accel.length() > 0) {
 
 				lastThrustTime = 0;
 
@@ -135,20 +141,6 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 						new Drag(0,0),
 						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
 						new Decay(100));
-
-				/*
-				allow color/scale settings
-				if (scale > 1) {
-					thrust = ed.createEntity();
-					ed.setComponents(thrust, 
-							new Position(thrustPos, new Quaternion()), 
-							new Velocity(thrustVel.mult(0.9f)),
-							new Acceleration(new Vector3f()), 
-							new Drag(0,0),
-							new ModelType(RetroPanicModelFactory.MODEL_THRUST),
-							new Decay(200));
-				}
-				*/
 				
 			} else if (value == 0) {
 				lastThrustTime = THRUST_INTERVAL;
@@ -183,9 +175,5 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	@Override
 	public void update(float tpf) {
 		ed.setComponent(ship, new Acceleration(accel, ed.getComponent(ship, Acceleration.class).getAngular()));
-		
-		//add to the position trail
-		
-	}
-
+	}		
 }

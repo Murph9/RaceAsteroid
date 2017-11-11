@@ -31,6 +31,6 @@ public class Acceleration implements EntityComponent {
     
     @Override
     public String toString() {
-        return "Velocity[linear=" + linear + ", angular=" + angular + "]";
+        return "Acceleration[linear=" + linear + ", angular=" + angular + "]";
     }
 }

@@ -35,6 +35,8 @@
 package race;
 
 import com.jme3.app.Application;
+import com.jme3.material.Material;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.simsilica.es.Entity;
@@ -114,6 +116,16 @@ public class ModelState extends BaseAppState {
 		Position p = e.get(Position.class);
 		s.setLocalTranslation(p.getLocation());
 		s.setLocalRotation(p.getFacing());
+		
+		Colour c = ed.getComponent(e.getId(), Colour.class);
+		if (c != null) {
+			if (s instanceof Geometry) {
+				Geometry g = (Geometry)s;
+				Material m = g.getMaterial();
+				m.setColor("Color", c.getColour());
+				g.setMaterial(m);
+			}
+		}
 	}
 
 	protected void updateModels(Set<Entity> set) {

@@ -95,6 +95,8 @@ public class PanicContactHandler implements ContactHandler {
 		// Apply the impulse to the velocities
 		vl2.addLocal(cn.mult(impulse * invMass2));
 		ship.set(new Velocity(vl2, v2.getAngular()));
+		
+		ship.set(new Stun(ShipControlState.COLLISION_STUN_TIME));
 	}
 
 	public void handleContact(Entity line, Entity circle, Vector3f cp, Vector3f cn, float penetration) {

@@ -110,10 +110,12 @@ public class SinglePlayerState extends BaseAppState {
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f()),
                          new Acceleration(new Vector3f()),
-                         new Mass(mobile ? 0.1 : 0.0));
+                         new Mass(mobile ? 0.1 : 0.0),
+                         new Stun(0));
         getState(ShipControlState.class).setEnabled(mobile);
         getState(ShipCamera.class).setEnabled(mobile);
         getState(World.class).setEnabled(mobile);
+        getState(DebugShipUI.class).setEnabled(mobile);
     }
 
     protected void setupLevel() {
@@ -137,6 +139,7 @@ public class SinglePlayerState extends BaseAppState {
                          new Drag(0.1f, 0.25f),
                          CollisionShape.Circle(0.1f),
                          new Mass(0.1),
+                         new Stun(0),
                          new ModelType(RetroPanicModelFactory.MODEL_SHIP));
         
         getStateManager().attach(new ShipControlState(ship));
@@ -145,6 +148,8 @@ public class SinglePlayerState extends BaseAppState {
         getState(ShipCamera.class).setEnabled(false);
         getStateManager().attach(new World(ship));
         getState(World.class).setEnabled(false);
+        getStateManager().attach(new DebugShipUI(ship));
+        getState(DebugShipUI.class).setEnabled(false);
         
         setState(GameState.LoadLevel);
     }
@@ -154,6 +159,7 @@ public class SinglePlayerState extends BaseAppState {
 		getStateManager().detach(getState(ShipControlState.class));
 		getStateManager().detach(getState(ShipCamera.class));
 		getStateManager().detach(getState(World.class));
+		getStateManager().detach(getState(DebugShipUI.class));
 	}
 
 	@Override

@@ -115,16 +115,18 @@ public class RetroPanicModelFactory implements ModelFactory {
 	public Spatial createModel(Entity e) {
 
 		ModelType type = e.get(ModelType.class);
+		Colour c = ed.getComponent(e.getId(), Colour.class);
+		
 		if (MODEL_SHIP.equals(type.getType())) {
 			CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
 			float radius = cs == null ? 0.1f : cs.getRadius();
-			return createSprite("Ship", radius * 4, ColorRGBA.Cyan, 0, 7);
+			return createSprite("Ship", radius * 4, (c!=null?c.getColour():ColorRGBA.Cyan), 0, 7);
 		} else if (MODEL_THRUST.equals(type.getType())) {
-			return createSprite("Thrust", 0.5f, ColorRGBA.Red, 0, 5);
+			return createSprite("Thrust", 0.5f, (c!=null?c.getColour():ColorRGBA.Red), 0, 5);
 		} else if (MODEL_WALL.equals(type.getType())) {
-			return createLine("Wall", ed.getComponent(e.getId(), CollisionShape.class).getDir(), ColorRGBA.White);
+			return createLine("Wall", ed.getComponent(e.getId(), CollisionShape.class).getDir(), (c!=null?c.getColour():ColorRGBA.White));
 		} else if (MODEL_LINE.equals(type.getType())) {
-			return createLine("Line", ed.getComponent(e.getId(), CollisionShape.class).getDir(), ColorRGBA.Gray);
+			return createLine("Line", ed.getComponent(e.getId(), CollisionShape.class).getDir(), (c!=null?c.getColour():ColorRGBA.Gray));
 		} else {
 			try {
 				throw new Exception("Unknown type: " + type.getType());
