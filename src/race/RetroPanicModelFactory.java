@@ -48,95 +48,90 @@ import com.jme3.texture.Texture;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 
-
 /**
- *  Implements the Asteroid Panic spatials as quads with
- *  sprites selected from a sprite sheet.
+ * Implements the Asteroid Panic spatials as quads with sprites selected from a
+ * sprite sheet.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class RetroPanicModelFactory implements ModelFactory {
 
-    public static final String MODEL_SHIP = "ship";
-    public static final String MODEL_THRUST = "thrust";
-    public static final String MODEL_WALL = "wall";
-    public static final String MODEL_LINE = "line";
+	public static final String MODEL_SHIP = "ship";
+	public static final String MODEL_THRUST = "thrust";
+	public static final String MODEL_WALL = "wall"; //has collision
+	public static final String MODEL_LINE = "line"; //does not have collision
 
-    private ModelState state;
-    private AssetManager assets;
-    private EntityData ed;
+	private ModelState state;
+	private AssetManager assets;
+	private EntityData ed;
 
-    private Texture sprites;
+	private Texture sprites;
 
-    private static final float cellSize = 128f/1024f;
+	private static final float cellSize = 128f / 1024f;
 
-    public void setState( ModelState state ) {
-        this.state = state;
-        this.assets = state.getApplication().getAssetManager();
-        this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
+	public void setState(ModelState state) {
+		this.state = state;
+		this.assets = state.getApplication().getAssetManager();
+		this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
 
-        sprites = assets.loadTexture( "assets/Textures/panic-sprites.png" );
-    }
+		sprites = assets.loadTexture("assets/Textures/panic-sprites.png");
+	}
 
-    private float[] spriteCoords( int x, int y ) {
-        float s = x * cellSize;
-        float t = y * cellSize;
-        return new float[] { s, t,
-                             s + cellSize, t,
-                             s + cellSize, t + cellSize,
-                             s, t + cellSize };
-    }
+	private float[] spriteCoords(int x, int y) {
+		float s = x * cellSize;
+		float t = y * cellSize;
+		return new float[] { s, t, s + cellSize, t, s + cellSize, t + cellSize, s, t + cellSize };
+	}
 
-    protected Geometry createSprite( String name, float size, ColorRGBA color, int x, int y ) {
-        Quad quad = new Quad(size, size);
-        quad.setBuffer(Type.TexCoord, 2, spriteCoords(x,y));
+	protected Geometry createSprite(String name, float size, ColorRGBA color, int x, int y) {
+		Quad quad = new Quad(size, size);
+		quad.setBuffer(Type.TexCoord, 2, spriteCoords(x, y));
 
-        float halfSize = size * 0.5f;
-        quad.setBuffer(Type.Position, 3, new float[]{ -halfSize, -halfSize, 0,
-                                                       halfSize, -halfSize, 0,
-                                                       halfSize,  halfSize, 0,
-                                                      -halfSize,  halfSize, 0
-                                                    });
-        quad.updateBound();
+		float halfSize = size * 0.5f;
+		quad.setBuffer(Type.Position, 3, new float[] { -halfSize, -halfSize, 0, halfSize, -halfSize, 0, halfSize,
+				halfSize, 0, -halfSize, halfSize, 0 });
+		quad.updateBound();
 
-        Geometry geom = new Geometry(name, quad);
+		Geometry geom = new Geometry(name, quad);
 
-        Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setTexture("ColorMap", sprites);
-        mat.setColor("Color", color);
-        mat.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
-        geom.setMaterial(mat);
+		Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setTexture("ColorMap", sprites);
+		mat.setColor("Color", color);
+		mat.getAdditionalRenderState().setBlendMode(BlendMode.Additive);
+		geom.setMaterial(mat);
 
-        return geom;
-    }
-    
-    protected Geometry createLine(String name, Vector3f end, ColorRGBA color) {
-    	Line l = new Line(new Vector3f(0,0,0), end);
-    	Geometry g = new Geometry(name, l);
-    	Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", color);
-        g.setMaterial(mat);
-        return g;
-    }
+		return geom;
+	}
+
+	protected Geometry createLine(String name, Vector3f end, ColorRGBA color) {
+		Line l = new Line(new Vector3f(0, 0, 0), end);
+		Geometry g = new Geometry(name, l);
+		Material mat = new Material(assets, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", color);
+		g.setMaterial(mat);
+		return g;
+	}
 
 	public Spatial createModel(Entity e) {
 
-        ModelType type = e.get(ModelType.class);
-        if (MODEL_SHIP.equals(type.getType())) {
-            CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
-            float radius = cs == null ? 0.1f : cs.getRadius();
-            return createSprite("Ship", radius * 4, ColorRGBA.Cyan, 0, 7);
-        } else if( MODEL_THRUST.equals(type.getType()) ) {
-            return createSprite("Thrust", 0.5f, ColorRGBA.Red, 0, 5);
-        } else if (MODEL_WALL.equals(type.getType()) || MODEL_LINE.equals(type.getType())) {
-        	return createLine("Wall", ed.getComponent(e.getId(), CollisionShape.class).getDir(), ColorRGBA.White);
-        } else {
-            try {
+		ModelType type = e.get(ModelType.class);
+		if (MODEL_SHIP.equals(type.getType())) {
+			CollisionShape cs = ed.getComponent(e.getId(), CollisionShape.class);
+			float radius = cs == null ? 0.1f : cs.getRadius();
+			return createSprite("Ship", radius * 4, ColorRGBA.Cyan, 0, 7);
+		} else if (MODEL_THRUST.equals(type.getType())) {
+			return createSprite("Thrust", 0.5f, ColorRGBA.Red, 0, 5);
+		} else if (MODEL_WALL.equals(type.getType())) {
+			return createLine("Wall", ed.getComponent(e.getId(), CollisionShape.class).getDir(), ColorRGBA.White);
+		} else if (MODEL_LINE.equals(type.getType())) {
+			return createLine("Line", ed.getComponent(e.getId(), CollisionShape.class).getDir(), ColorRGBA.Gray);
+		} else {
+			try {
 				throw new Exception("Unknown type: " + type.getType());
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				return null;
 			}
-        }
-    }
+		}
+	}
 }

@@ -35,6 +35,7 @@
 package race;
 
 import com.jme3.app.Application;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
@@ -59,11 +60,16 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private EntityData ed;
 	private EntityId ship;
 
-	private static final float ROTATE_SPEED = 3;
+	private static final float ROTATE_SPEED = 4;
+	
+	private static final float RAY_CAST_LENGTH = 1.3f;
 	private static final float ACCEL_VALUE = 3;
+	
+	private static final float WALL_SCALE = 5;
+	private static final float WALL_SCALE_2 = 3.3f;
 
-	private double lastThrustTime = 0.1;
-	private double thrustInterval = 0.1;
+	private static final float THRUST_INTERVAL = 0.05f;
+	private float lastThrustTime = 0.1f;
 
 	private Vector3f accel = new Vector3f();
 
@@ -100,44 +106,59 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	}
 
 	public void valueActive(FunctionId func, double value, double tpf) {
+		Velocity vel = ed.getComponent(ship, Velocity.class);
 		if (func == ShipFunctions.F_TURN) {
 
-			Velocity vel = ed.getComponent(ship, Velocity.class);
 			float rotate = (float) (value * ROTATE_SPEED);
 			ed.setComponent(ship, new Velocity(vel.getLinear(), new Vector3f(0, 0, rotate)));
 		} else if (func == ShipFunctions.F_THRUST) {
 
 			Position pos = ed.getComponent(ship, Position.class);
 			accel.set(0, (float) (ACCEL_VALUE * value), 0);
-			accel.mult(behindShipScale());
+			float scale = behindShipScale();
+			accel.multLocal(scale);
 			accel = pos.getFacing().multLocal(accel); // quaternion multlocal applies to the vector
-
+			
 			lastThrustTime += tpf;
-			if (value != 0 && lastThrustTime >= thrustInterval) {
+			if (value != 0 && lastThrustTime >= THRUST_INTERVAL) {
 
 				lastThrustTime = 0;
 
-				// Create a thrust entity (TODO push out making a bell curve shape || or texture..)
+				// Create a thrust entity
 				EntityId thrust = ed.createEntity();
-				Vector3f thrustVel = accel.mult(-2);
-				Vector3f thrustPos = pos.getLocation().add(thrustVel.normalize().multLocal(0.1f));
+				Vector3f thrustVel = vel.getLinear().add(accel.mult(-1));
+				Vector3f thrustPos = pos.getLocation().add(accel.normalize().multLocal(-0.1f));
 				ed.setComponents(thrust, 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
 						new Acceleration(new Vector3f()), 
-						new Drag(3f, 4f),
+						new Drag(0,0),
 						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
-						new Decay(300));
+						new Decay(100));
 
+				/*
+				allow color/scale settings
+				if (scale > 1) {
+					thrust = ed.createEntity();
+					ed.setComponents(thrust, 
+							new Position(thrustPos, new Quaternion()), 
+							new Velocity(thrustVel.mult(0.9f)),
+							new Acceleration(new Vector3f()), 
+							new Drag(0,0),
+							new ModelType(RetroPanicModelFactory.MODEL_THRUST),
+							new Decay(200));
+				}
+				*/
+				
 			} else if (value == 0) {
-				lastThrustTime = thrustInterval;
+				lastThrustTime = THRUST_INTERVAL;
 			}
 		}
 	}
 
 	private float behindShipScale() {
 		Vector3f rayStart = ed.getComponent(ship, Position.class).getLocation();
-		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0,-1,0));
+		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0,-RAY_CAST_LENGTH,0));
 		
 		EntitySet entities = ed.getEntities(CollisionShape.class);
 		float minDist = 1;
@@ -152,8 +173,8 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 					minDist = Math.min(minDist, result.t);
 			}
 		}
-		
-		return 1/(minDist*minDist);
+		float result = Math.max(1, (WALL_SCALE*FastMath.exp(-minDist*WALL_SCALE_2))); //never slower 
+		return result;
 	}
 	
 	public void valueChanged(FunctionId func, InputState value, double tpf) {
@@ -162,6 +183,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	@Override
 	public void update(float tpf) {
 		ed.setComponent(ship, new Acceleration(accel, ed.getComponent(ship, Acceleration.class).getAngular()));
+		
+		//add to the position trail
+		
 	}
 
 }

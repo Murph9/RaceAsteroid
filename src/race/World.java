@@ -1,32 +1,169 @@
 package race;
 
+import java.util.Arrays;
+
+import com.jme3.app.Application;
+import com.jme3.app.state.BaseAppState;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
+import com.simsilica.es.EntitySet;
 
-public class World {
+public class World extends BaseAppState {
 
-	private static Vector3f boxWorld[] = new Vector3f[]
+	private static Vector3f A = new Vector3f(-2,2,0);
+	private static Vector3f B = new Vector3f(2,2,0);
+	private static Vector3f C = new Vector3f(2,-2,0);
+	private static Vector3f D = new Vector3f(-2,-2,0);
+	private static Vector3f E = new Vector3f(-1,3,0);
+	private static Vector3f F = new Vector3f(1,3,0);
+	private static Vector3f[] initialState = new Vector3f[]
 			{
-				new Vector3f(-0.5f, 1f, 0), new Vector3f(0.5f, -2f, 0),
-				new Vector3f(-3f, -3f, 0), new Vector3f(0, 6f, 0),
-				new Vector3f(-3f, -3f, 0), new Vector3f(6f, 0f, 0),
-				new Vector3f(3f, 3f, 0), new Vector3f(-6f, 0f, 0),
-				new Vector3f(3f, 3f, 0), new Vector3f(0f, -6f, 0),
+				A, D.subtract(A),
+				C, D.subtract(C),
+				B, C.subtract(B),
+				A, E.subtract(A),
+				B, F.subtract(B),
+			};
+	
+	private static Vector3f G = new Vector3f(0,-1,0);
+	private static Vector3f H = new Vector3f(0,2,0);
+	private static Vector3f I = new Vector3f(-1,1,0);
+	private static Vector3f J = new Vector3f(1,1,0);
+	private static Vector3f[] helpArrow = new Vector3f[] 
+			{
+				G, H.subtract(G),
+				I, H.subtract(I),
+				J, H.subtract(J),
 			};
 	
 	public static void generate(EntityData ed) {
-		for (int i = 0; i < boxWorld.length; i+=2) {
-			EntityId line = ed.createEntity();
-	        ed.setComponents(line, 
-	        		 new Position(boxWorld[i], new Quaternion()),
-	        		 new Velocity(new Vector3f(), new Vector3f()),
-	                 CollisionShape.Line(boxWorld[i+1]),
-	                 new Mass(10000),
-	                 new ModelType(RetroPanicModelFactory.MODEL_WALL));
-    	}	
+		
+	}
+
+	private EntityData ed;
+	private EntityId ship;
+	private EntitySet set;
+	
+	private static final float SPAWN_RADIUS = 5;
+	private Vector3f nextSpawn;
+	private PieceType nextSpawnType;
+	private static Piece[] pieceList = new Piece[] 
+			{
+				new Piece(PieceType.UP_2, PieceType.UP_2, 
+						new Vector3f[] {
+								new Vector3f(-1,0,0), new Vector3f(0,3,0), 
+								new Vector3f(1,0,0), new Vector3f(0,3,0)
+								}, 
+						new Vector3f(0,3,0)),
+				new Piece(PieceType.UP_2, PieceType.UP_2, 
+						new Vector3f[] {
+								new Vector3f(-1,0,0), new Vector3f(1,1,0), 
+								new Vector3f(1,0,0), new Vector3f(1,1,0)
+								}, 
+						new Vector3f(1,1,0)),
+				new Piece(PieceType.UP_2, PieceType.UP_2, 
+						new Vector3f[] {
+								new Vector3f(-1,0,0), new Vector3f(-1,1,0), 
+								new Vector3f(1,0,0), new Vector3f(-1,1,0)
+								}, 
+						new Vector3f(-1,1,0))
+			};
+	
+	public World(EntityId ship) {
+		this.ship = ship;
+	}
+
+	@Override
+	protected void initialize(Application arg0) {
+		ed = getState(EntityDataState.class).getEntityData();
+		set = ed.getEntities(ModelType.class);
+		
+		//spawn initial things
+		spawnAsObjects(initialState, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
+		spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
+		
+		nextSpawn = E.add(F).mult(0.5f);
+		nextSpawnType = PieceType.UP_2;
 	}
 	
-	//TODO Make into an appstate probs
+	@Override
+	protected void cleanup(Application arg0) {
+		// Release the entity set we grabbed previously
+		set.release();
+		set = null;
+	}
+
+	@Override
+	public void update(float tpf) {
+		set.applyChanges();
+		
+		Vector3f pos = ed.getComponent(ship, Position.class).getLocation();
+		while (pos.distance(nextSpawn) < SPAWN_RADIUS) {
+			
+			Piece[] avaliable = Arrays.stream(pieceList).filter( x -> x.startType == this.nextSpawnType).toArray(Piece[]::new); 
+			if (avaliable.length == 0)
+				break;
+			
+			//spawn next
+			int index = FastMath.nextRandomInt(0, avaliable.length - 1);
+			spawn(avaliable[index]);
+		}
+	}
+	
+	private void spawn(Piece p) {
+		if (p.startType != this.nextSpawnType)
+			try {
+				throw new Exception("Not the right type: " + p.startType + " and " + this.nextSpawnType);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		
+		spawnAsObjects(p.walls, RetroPanicModelFactory.MODEL_WALL, this.nextSpawn);
+
+		this.nextSpawn.addLocal(p.offset);
+		this.nextSpawnType = p.endType;
+	}
+	
+	private void spawnAsObjects(Vector3f[] v, String modelType, Vector3f offset) {
+		if (v == null || v.length % 2 != 0) {
+			System.out.print("What:" + v);
+			return;
+		}
+		
+		for (int i = 0; i < v.length; i+=2) {
+			EntityId line = ed.createEntity();
+			ed.setComponents(line, 
+					new Position(offset.add(v[i])),
+					new Velocity(new Vector3f()),
+					CollisionShape.Line(v[i+1]),
+					new Mass(10000),
+					new ModelType(modelType));
+		}
+	}
+	
+	@Override
+	protected void onDisable() {
+	}
+	@Override
+	protected void onEnable() {
+	}
+}
+
+enum PieceType {
+	UP_2;
+}
+class Piece {
+	Vector3f[] walls;
+	PieceType startType;
+	PieceType endType;
+	Vector3f offset;
+	public Piece(PieceType start, PieceType end, Vector3f[] walls, Vector3f offset) {
+		this.startType = start;
+		this.endType = end;
+		this.walls = walls;
+		this.offset = offset;
+	}
 }
