@@ -41,6 +41,8 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.lemur.event.BaseAppState;
 
+import race.World.WorldSpawnType;
+
 
 /**
  *  Keeps track of the single-player game state and
@@ -138,15 +140,16 @@ public class SinglePlayerState extends BaseAppState {
                          new Acceleration(new Vector3f(), new Vector3f()),
                          new Drag(0.1f, 0.25f),
                          CollisionShape.Circle(0.1f),
-                         new Mass(0.1),
+                         new Mass(1),
                          new Stun(0),
+                         new Emits(false, new Vector3f(), RetroPanicModelFactory.MODEL_THRUST, 0.01f, 100l),
                          new ModelType(RetroPanicModelFactory.MODEL_SHIP));
         
         getStateManager().attach(new ShipControlState(ship));
         getState(ShipControlState.class).setEnabled(false);
         getStateManager().attach(new ShipCamera(ship));
         getState(ShipCamera.class).setEnabled(false);
-        getStateManager().attach(new World(ship));
+        getStateManager().attach(new World(ship, WorldSpawnType.Static));
         getState(World.class).setEnabled(false);
         getStateManager().attach(new DebugShipUI(ship));
         getState(DebugShipUI.class).setEnabled(false);

@@ -12,6 +12,18 @@ import com.simsilica.es.EntitySet;
 
 public class World extends BaseAppState {
 
+	private static Vector3f[] staticWorld = new Vector3f[] {
+			H.v3(-1,2,0), H.v3(2,0,0),
+			H.v3(1,2,0), H.v3(1,-1,0),
+			H.v3(2,1,0), H.v3(0,-2,0),
+			H.v3(2,-1,0), H.v3(-1,-1,0),
+			
+			H.v3(1,-2,0), H.v3(-2,0,0),
+			H.v3(-1,-2,0), H.v3(-1,1,0),
+			H.v3(-2,-1,0), H.v3(0,2,0),
+			H.v3(-2,1,0), H.v3(1,1,0),
+	};
+	
 	private static Vector3f A = new Vector3f(-2,2,0);
 	private static Vector3f B = new Vector3f(2,2,0);
 	private static Vector3f C = new Vector3f(2,-2,0);
@@ -28,14 +40,14 @@ public class World extends BaseAppState {
 			};
 	
 	private static Vector3f G = new Vector3f(0,-1,0);
-	private static Vector3f H = new Vector3f(0,2,0);
+	private static Vector3f H_ = new Vector3f(0,2,0);
 	private static Vector3f I = new Vector3f(-1,1,0);
 	private static Vector3f J = new Vector3f(1,1,0);
 	private static Vector3f[] helpArrow = new Vector3f[] 
 			{
-				G, H.subtract(G),
-				I, H.subtract(I),
-				J, H.subtract(J),
+				G, H_.subtract(G),
+				I, H_.subtract(I),
+				J, H_.subtract(J),
 			};
 	
 	public static void generate(EntityData ed) {
@@ -45,6 +57,8 @@ public class World extends BaseAppState {
 	private EntityData ed;
 	private EntityId ship;
 	private EntitySet set;
+	
+	private WorldSpawnType type;
 	
 	private static final float SPAWN_RADIUS = 5;
 	private Vector3f nextSpawn;
@@ -71,8 +85,13 @@ public class World extends BaseAppState {
 						new Vector3f(-1,1,0))
 			};
 	
-	public World(EntityId ship) {
+	enum WorldSpawnType {
+		Infinite,
+		Static
+	}
+	public World(EntityId ship, WorldSpawnType type) {
 		this.ship = ship;
+		this.type = type;
 	}
 
 	@Override
@@ -80,9 +99,15 @@ public class World extends BaseAppState {
 		ed = getState(EntityDataState.class).getEntityData();
 		set = ed.getEntities(ModelType.class);
 		
-		//spawn initial things
-		spawnAsObjects(initialState, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
-		spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
+		if (type == WorldSpawnType.Infinite) {
+			//spawn initial things
+			spawnAsObjects(initialState, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
+			spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
+		}
+		
+		if (type == WorldSpawnType.Static) {
+			spawnAsObjects(staticWorld, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
+		}
 		
 		nextSpawn = E.add(F).mult(0.5f);
 		nextSpawnType = PieceType.UP_2;
@@ -98,6 +123,9 @@ public class World extends BaseAppState {
 	@Override
 	public void update(float tpf) {
 		set.applyChanges();
+		
+		if (type == WorldSpawnType.Static)
+			return;
 		
 		Vector3f pos = ed.getComponent(ship, Position.class).getLocation();
 		while (pos.distance(nextSpawn) < SPAWN_RADIUS) {

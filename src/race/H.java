@@ -48,4 +48,9 @@ public class H {
 		
 		return new IntersectResult(false, null, 0);
 	}
+	
+	//shorthand for new Vector3f
+	public static Vector3f v3(float x, float y, float z) {
+		return new Vector3f(x,y,z);
+	}
 }
