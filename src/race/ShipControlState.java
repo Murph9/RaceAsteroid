@@ -63,11 +63,12 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private static final float ROTATE_SPEED = 4;
 	public static final long COLLISION_STUN_TIME = 400;
 	
-	private static final float RAY_CAST_LENGTH = 1.3f;
-	private static final float ACCEL_VALUE = 3;
+	private static final float RAY_CAST_LENGTH = 0.8f;
+	private static final float ACCEL_VALUE = 1f;
 	
-	private static final float WALL_SCALE = 6.56f;
-	private static final float WALL_SCALE_2 = 2.1f;
+	private static final float WALL_SCALE_A = 5.66f;
+	private static final float WALL_SCALE_B = 3.75f;
+	private static final float WALL_SCALE_C = 0.87f;
 
 	private static final float THRUST_INTERVAL = 0.05f;
 	private float lastThrustTime = 0.1f;
@@ -130,9 +131,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 				lastThrustTime = 0;
 
-				// Create a thrust entity
-				EntityId thrust = ed.createEntity();
-				Vector3f thrustVel = vel.getLinear().add(accel.mult(-1));
+				// Create a thrust particle TODO EmitterState
+				/*EntityId thrust = ed.createEntity();
+				Vector3f thrustVel = vel.getLinear().add(accel.mult(-5));
 				Vector3f thrustPos = pos.getLocation().add(accel.normalize().multLocal(-0.1f));
 				ed.setComponents(thrust, 
 						new Position(thrustPos, new Quaternion()), 
@@ -141,7 +142,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 						new Drag(0,0),
 						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
 						new Decay(100));
-				
+				*/
 			} else if (value == 0) {
 				lastThrustTime = THRUST_INTERVAL;
 			}
@@ -151,6 +152,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private float behindShipScale() {
 		Vector3f rayStart = ed.getComponent(ship, Position.class).getLocation();
 		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0,-RAY_CAST_LENGTH,0));
+		
+		//TODO throw out 2 rays about 30 degrees apart (because its not just one)
+		//TODO is also seems that boosting off the wall spins the craft a little, so these 2 rays are important
 		
 		EntitySet entities = ed.getEntities(CollisionShape.class);
 		float minDist = 1;
@@ -165,7 +169,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 					minDist = Math.min(minDist, result.t);
 			}
 		}
-		float result = Math.max(1, (WALL_SCALE*FastMath.exp(-minDist*WALL_SCALE_2))); //never slower 
+		float result = Math.max(1, (WALL_SCALE_A*FastMath.exp(-minDist*WALL_SCALE_B)) + (WALL_SCALE_C/minDist)); //never slower 
 		return result;
 	}
 	
