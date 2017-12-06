@@ -142,7 +142,6 @@ public class SinglePlayerState extends BaseAppState {
                          CollisionShape.Circle(0.1f),
                          new Mass(1),
                          new Stun(0),
-                         new Emits(false, new Vector3f(), RetroPanicModelFactory.MODEL_THRUST, 0.01f, 100l),
                          new ModelType(RetroPanicModelFactory.MODEL_SHIP));
         
         getStateManager().attach(new ShipControlState(ship));
