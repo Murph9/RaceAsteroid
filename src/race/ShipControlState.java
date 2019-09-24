@@ -104,7 +104,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			
 			// TODO check the emitter code in zay es exammples:
 			// https://github.com/jMonkeyEngine-Contributions/zay-es/wiki/Smoking-Barrels
-			lastThrustTime += tpf;
+			lastThrustTime += tpf*(accelForce/BASE_ACCEL_VALUE);
 			if (value != 0 && lastThrustTime >= THRUST_INTERVAL && accel.length() > 0) {
 
 				lastThrustTime = 0;
@@ -135,7 +135,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			accelForce -= ACCEL_INC_VALUE * tpf * 3; //harder cutoff
 		
 		accelForce = FastMath.clamp(accelForce, BASE_ACCEL_VALUE, MAX_ACCEL_VALUE);
-		System.out.println(dist + " " + accelForce);
+		
 		return accelForce;
 	}
 	private float thrustRayDist() {
