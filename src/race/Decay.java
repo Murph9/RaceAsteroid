@@ -23,6 +23,6 @@ public class Decay implements EntityComponent {
 
 	@Override
 	public String toString() {
-		return "Decay[" + (delta / 1000000.0) + " ms]";
+		return "Decay[" + H.roundDecimal(delta / 1000000.0, 3) + " ms]";
 	}
 }

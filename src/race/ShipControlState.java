@@ -17,6 +17,8 @@ import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
 
+import race.CollisionShape.Type;
+
 /**
  * Maps player input into ship control.
  *
@@ -31,7 +33,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	public static final long COLLISION_STUN_TIME = 400;
 	
 	private static final float RAY_CAST_LENGTH = 0.8f;
-	private static final float ACCEL_VALUE = 1f;
+	private static final float ACCEL_VALUE = 3f;
 	
 	private static final float WALL_SCALE_A = 5.66f;
 	private static final float WALL_SCALE_B = 3.75f;
@@ -126,10 +128,10 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		EntitySet entities = ed.getEntities(CollisionShape.class);
 		float minDist = 1;
 		for (Entity entity: entities) {
-			ModelType type = ed.getComponent(entity.getId(), ModelType.class);
-			if (RetroPanicModelFactory.MODEL_WALL.equals(type.getType())) {
+			CollisionShape shape = ed.getComponent(entity.getId(), CollisionShape.class);
+			if (shape != null && shape.getType() == Type.Line) {
 				Vector3f p = ed.getComponent(entity.getId(), Position.class).getLocation();
-				Vector3f r = ed.getComponent(entity.getId(), CollisionShape.class).getDir();
+				Vector3f r = shape.getDir();
 				
 				H.IntersectResult result = H.linesIntersectXY(rayStart, rayStart.add(rayDir), p, p.add(r));
 				if (result.success)

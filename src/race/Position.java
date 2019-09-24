@@ -33,6 +33,6 @@ public class Position implements EntityComponent {
 
 	@Override
 	public String toString() {
-		return "Position[" + location + ", " + facing + "]";
+		return "Position[" + H.round3f(location, 3) + ", " + facing + "]";
 	}
 }

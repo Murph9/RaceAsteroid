@@ -51,10 +51,8 @@ public class DebugShipUI extends BaseAppState {
 		Acceleration a = ed.getComponent(ship, Acceleration.class);
 		Stun s = ed.getComponent(ship, Stun.class);
 		
-		values.setText("Position: " + p.getLocation() + "\n"
-				+ "Velocity: " + v.getLinear().length() + "\n"
-				+ "Acceleration: " + a.getLinear().length() + "\n"
-				+ "Stun: " + (s!=null? s.getPercent():"") + "%\n");
+		values.setText("Position: " + H.round3f(p.getLocation(), 3) + "\n" + "Velocity: " + v.getLinear().length() + "\n"
+				+ "Acceleration: " + a.getLinear().length() + "\n" + s + "\n");
 	}
 	
 	@Override

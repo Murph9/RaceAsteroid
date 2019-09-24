@@ -102,7 +102,7 @@ public class World extends BaseAppState {
 		if (type == WorldSpawnType.Infinite) {
 			//spawn initial things
 			spawnAsObjects(initialState, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
-			spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
+			//spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
 		}
 		
 		if (type == WorldSpawnType.Static) {

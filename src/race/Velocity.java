@@ -35,6 +35,6 @@ public class Velocity implements EntityComponent
 
     @Override
     public String toString() {
-        return "Velocity[linear=" + linear + ", angular=" + angular + "]";
+        return "Velocity[linear=" + H.round3f(linear, 3) + ", ang=" + H.round3f(angular, 3) + "]";
     }
 }

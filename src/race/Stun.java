@@ -19,6 +19,12 @@ public class Stun implements EntityComponent {
 
 	@Override
 	public String toString() {
-		return "Stun[" + (delta / 1000000.0) + " ms]";
+		double percent = getPercent();
+		if (percent > 1) {
+			return "Stun[v=0%, max=" + (delta / 1000000.0) + "ms]";	
+		}
+
+		return "Stun[v=" + (int)(getPercent()*100) + "%, max="
+				+ (delta / 1000000.0) + "ms]";
 	}
 }

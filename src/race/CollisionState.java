@@ -8,6 +8,9 @@ import com.jme3.util.SafeArrayList;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
+
+import race.CollisionShape.Type;
+
 import java.util.Set;
 
 /**
@@ -63,37 +66,33 @@ public class CollisionState extends BaseAppState {
 	}
 
 	protected void generateContacts(Entity e1, Entity e2) {
-		ModelType t1 = ed.getComponent(e1.getId(), ModelType.class);
-		ModelType t2 = ed.getComponent(e2.getId(), ModelType.class);
-		
 		// only handles collision between circle and line elements
-		// so find out which one is which:
-		if (RetroPanicModelFactory.MODEL_SHIP.equals(t1.getType())) {
-			if (!RetroPanicModelFactory.MODEL_WALL.equals(t2.getType())) {
-				return;
-			}
-			//ship is 1, line is 2
-			generateContactsLineCircle(e2, e1);
+
+		CollisionShape cs1 = ed.getComponent(e1.getId(), CollisionShape.class);
+		CollisionShape cs2 = ed.getComponent(e2.getId(), CollisionShape.class);
 		
-		} else if (RetroPanicModelFactory.MODEL_SHIP.equals(t2.getType())) {
-			if (!RetroPanicModelFactory.MODEL_WALL.equals(t1.getType())) {
-				return;
-			}
-			//ship is 2, line is 1
+		// attempt line/circle
+		if (cs1.getType() == Type.Line && cs2.getType() == Type.Circle) {
 			generateContactsLineCircle(e1, e2);
-		} else {
-			//no other collisions possible
+		}
+
+		// attempt circle/line
+		if (cs1.getType() == Type.Circle && cs2.getType() == Type.Line) {
+			generateContactsLineCircle(e2, e1);
 		}
 	}
 	private void generateContactsLineCircle(Entity line, Entity circle) {
 
-		CollisionShape s1 = circle.get(CollisionShape.class);
-		Vector3f c = circle.get(Position.class).getLocation();
-		float r = s1.getRadius();
-		CollisionShape s2 = line.get(CollisionShape.class);
+		//line
+		CollisionShape lcs = line.get(CollisionShape.class);
 		Vector3f a = line.get(Position.class).getLocation();
-		Vector3f b = a.add(s2.getDir());
-		
+		Vector3f b = a.add(lcs.getDir());
+
+		//circle
+		CollisionShape ccs = circle.get(CollisionShape.class);
+		Vector3f c = circle.get(Position.class).getLocation();
+		float r = ccs.getRadius();
+
 		Vector3f ac = c.subtract(a);
 		Vector3f ab = b.subtract(a);
 		Vector3f ad = ac.project(ab);
@@ -162,5 +161,5 @@ public class CollisionState extends BaseAppState {
 
 		generateContacts();
 	}
-
+	
 }

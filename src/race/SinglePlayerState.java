@@ -105,7 +105,7 @@ public class SinglePlayerState extends BaseAppState {
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f(), new Vector3f()),
                          new Acceleration(new Vector3f(), new Vector3f()),
-                         new Drag(0.1f, 0.25f),
+                         new Drag(0.5f, 1f),
                          CollisionShape.Circle(0.1f),
                          new Mass(1),
                          new Stun(0),

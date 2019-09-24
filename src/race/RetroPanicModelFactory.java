@@ -79,7 +79,6 @@ public class RetroPanicModelFactory implements ModelFactory {
 	}
 
 	public Spatial createModel(Entity e) {
-
 		ModelType type = e.get(ModelType.class);
 		Colour c = ed.getComponent(e.getId(), Colour.class);
 		

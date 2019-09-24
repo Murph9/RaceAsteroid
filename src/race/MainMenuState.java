@@ -11,12 +11,11 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.style.ElementId;
 
-
 /**
  *  Lays out the main menu controls and handles the clicks.
  *  When enabled/disabled the main menu is shown/hidden.
  *
- *  @author    Paul Speed
+ * @author Paul Speed
  */
 public class MainMenuState extends BaseAppState {
 
@@ -26,7 +25,7 @@ public class MainMenuState extends BaseAppState {
     }
 
     @Override
-    protected void initialize( Application app ) {
+    protected void initialize(Application app) {
 
         menu = new Container(new SpringGridLayout(), new ElementId(PanicStyles.MENU_ID), "retro");
 
@@ -39,26 +38,25 @@ public class MainMenuState extends BaseAppState {
         exit.addClickCommands(new Exit());
 
         Camera cam = app.getCamera();
-        float menuScale = cam.getHeight()/720f;
+        float menuScale = cam.getHeight() / 720f;
 
         Vector3f pref = menu.getPreferredSize();
         menu.setLocalTranslation(cam.getWidth() * 0.5f - pref.x * 0.5f * menuScale,
-                                 cam.getHeight() * 0.75f + pref.y * 0.5f * menuScale,
-                                 10);
+                cam.getHeight() * 0.75f + pref.y * 0.5f * menuScale, 10);
         menu.setLocalScale(menuScale);
     }
 
     @Override
-    protected void cleanup( Application app ) {
+    protected void cleanup(Application app) {
     }
 
     @Override
-    public void update( float tpf ) {
+    public void update(float tpf) {
     }
 
     @Override
     protected void onEnable() {
-        Main main = (Main)getApplication();
+        Main main = (Main) getApplication();
         main.getGuiNode().attachChild(menu);
     }
 
@@ -68,14 +66,14 @@ public class MainMenuState extends BaseAppState {
     }
 
     private class Start implements Command<Button> {
-        public void execute( Button source ) {
+        public void execute(Button source) {
             getStateManager().attach(new SinglePlayerState());
             setEnabled(false);
         }
     }
 
     private class Exit implements Command<Button> {
-        public void execute( Button source ) {
+        public void execute(Button source) {
             getApplication().stop();
         }
     }
