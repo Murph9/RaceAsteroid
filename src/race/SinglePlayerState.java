@@ -119,7 +119,7 @@ public class SinglePlayerState extends BaseAppState {
         getState(ShipControlState.class).setEnabled(false);
         getStateManager().attach(new ShipCamera(ship));
         getState(ShipCamera.class).setEnabled(false);
-        getStateManager().attach(new World(ship, WorldSpawnType.Static));
+        getStateManager().attach(new World(ship, WorldSpawnType.Infinite));
         getState(World.class).setEnabled(false);
         getStateManager().attach(new DebugShipUI(ship));
         getState(DebugShipUI.class).setEnabled(false);

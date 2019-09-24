@@ -133,8 +133,10 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			accelForce += ACCEL_INC_VALUE * tpf;
 		else
 			accelForce -= ACCEL_INC_VALUE * tpf * 3; //harder cutoff
+		
+		accelForce = FastMath.clamp(accelForce, BASE_ACCEL_VALUE, MAX_ACCEL_VALUE);
 		System.out.println(dist + " " + accelForce);
-		return FastMath.clamp(accelForce, BASE_ACCEL_VALUE, MAX_ACCEL_VALUE);
+		return accelForce;
 	}
 	private float thrustRayDist() {
 		Vector3f rayStart = ed.getComponent(ship, Position.class).getLocation();
