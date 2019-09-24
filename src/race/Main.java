@@ -12,8 +12,6 @@ import com.simsilica.lemur.style.Styles;
  *  Application entry point.  Sets up the game app states and
  *  initializes the GUI sub-system, styles, and the default
  *  control mappings.
- *
- *  @author Paul Speed
  */
 public class Main extends SimpleApplication {
 

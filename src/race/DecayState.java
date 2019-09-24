@@ -52,12 +52,10 @@ public class DecayState extends BaseAppState {
             if (d.getPercent() >= 1.0) {
                 ed.removeEntity(e.getId());
 
-                // TODO these are self propagating
+                // TODO this is self propagating
                 // then cause explosion
-                /*
                 Vector3f pos = e.get(Position.class).getLocation();
                 ed.setComponents(ed.createEntity(), new Die(), new Decay(250), new Position(pos));
-                */
             }
         }
     }
