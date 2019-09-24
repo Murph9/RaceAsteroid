@@ -41,15 +41,14 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	public static final long COLLISION_STUN_TIME = 350;
 	
 	private static final float RAY_CAST_LENGTH = 1.6f;
-	private static final float ACCEL_VALUE = 2.5f;
+	private static final float BASE_ACCEL_VALUE = 2.5f;
+	private static final float ACCEL_INC_VALUE = 2f;
+	private static final float MAX_ACCEL_VALUE = 5 * BASE_ACCEL_VALUE;
 	
-	private static final float WALL_SCALE_A = 5.66f;
-	private static final float WALL_SCALE_B = 3.75f;
-	private static final float WALL_SCALE_C = 0.87f;
-
 	private static final float THRUST_INTERVAL = 0.05f;
 	private float lastThrustTime = 0.1f;
 
+	private float accelForce;
 	private Vector3f accel = new Vector3f();
 
 	public ShipControlState(EntityId ship) {
@@ -93,9 +92,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		} else if (func == ShipFunctions.F_THRUST) {
 			
 			Position pos = ed.getComponent(ship, Position.class);
-			accel.set(0, (float) (ACCEL_VALUE * value), 0);
+			accel.set(0, 1, 0);
 			//scale based on wall proximity
-			accel.multLocal(behindShipScale());
+			accel.multLocal(getAccel((float)tpf) * (float)value);
 			accel = pos.getFacing().multLocal(accel); // quaternion multlocal applies to the vector
 			
 			//wall collision creates stun effect
@@ -103,6 +102,8 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
             if (s.getPercent() <= 1.0)
                 accel.set(0, 0, 0);
 			
+			// TODO check the emitter code in zay es exammples:
+			// https://github.com/jMonkeyEngine-Contributions/zay-es/wiki/Smoking-Barrels
 			lastThrustTime += tpf;
 			if (value != 0 && lastThrustTime >= THRUST_INTERVAL && accel.length() > 0) {
 
@@ -126,17 +127,24 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		}
 	}
 
-	private float behindShipScale() {
+	private float getAccel(float tpf) {
+		float dist = thrustRayDist();
+		if (dist < 1)
+			accelForce += ACCEL_INC_VALUE * tpf;
+		else
+			accelForce -= ACCEL_INC_VALUE * tpf * 3; //harder cutoff
+		System.out.println(dist + " " + accelForce);
+		return FastMath.clamp(accelForce, BASE_ACCEL_VALUE, MAX_ACCEL_VALUE);
+	}
+	private float thrustRayDist() {
 		Vector3f rayStart = ed.getComponent(ship, Position.class).getLocation();
 		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0, -RAY_CAST_LENGTH, 0));
 		
 		Vector3f rayDirOff1 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * 30, Vector3f.UNIT_Z).mult(rayDir);
 		Vector3f rayDirOff2 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * -30, Vector3f.UNIT_Z).mult(rayDir);
 
-		//TODO is also seems that boosting off the wall spins the craft a little, so these 2 rays are important
-		
 		EntitySet entities = ed.getEntities(CollisionShape.class);
-		float minDist = 10;
+		float minDist = 1;
 		for (Entity entity: entities) {
 			CollisionShape shape = ed.getComponent(entity.getId(), CollisionShape.class);
 			if (shape != null && shape.getType() == Type.Line && !shape.getGhost()) {
@@ -153,16 +161,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			}
 		}
 
-		return calcForceDiff(minDist);
+		return minDist * RAY_CAST_LENGTH;
 	}
 
-	private float calcForceDiff(float distance) {
-		if (distance <= 0)
-			return 1; // please no divide by zero
-		
-		float result = (WALL_SCALE_A * FastMath.exp(-distance * WALL_SCALE_B)) + (WALL_SCALE_C / distance);
-		return Math.max(1, result);
-	}
 	
 	public void valueChanged(FunctionId func, InputState value, double tpf) {
 	}

@@ -25,6 +25,7 @@ public class PhysicsState extends BaseAppState {
 
 		ed = getState(EntityDataState.class).getEntityData();
 		entities = ed.getEntities(Position.class, Velocity.class, Acceleration.class, Drag.class);
+		//TODO entities need to have all 4 of these types for its physics to update
 	}
 
 	@Override
@@ -74,12 +75,12 @@ public class PhysicsState extends BaseAppState {
 		for (Entity e : entities) {
 			Position pos = e.get(Position.class);
 			Velocity vel = e.get(Velocity.class);
-			Acceleration acc = e.get(Acceleration.class);
-			Vector3f alinear = acc.getLinear();
-
-			Drag drag = e.get(Drag.class);
 			Vector3f linear = vel.getLinear();
-			Vector3f forces = alinear.add(drag.getDrag(linear));
+
+			Acceleration acc = e.get(Acceleration.class);
+			Drag drag = e.get(Drag.class);
+			
+			Vector3f forces = acc.getLinear().add(drag.getDrag(linear));
 
 			linear = linear.addLocal((float) (forces.x * tpf), (float) (forces.y * tpf), (float) (forces.z * tpf));
 
