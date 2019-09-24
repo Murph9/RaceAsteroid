@@ -1,6 +1,8 @@
-package race;
+package race.component;
 
 import com.simsilica.es.EntityComponent;
+
+import race.H;
 
 /**
  * Represents a time-to-live for an entity.

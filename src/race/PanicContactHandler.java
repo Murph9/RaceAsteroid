@@ -4,6 +4,10 @@ import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 
+import race.component.Mass;
+import race.component.Stun;
+import race.component.Velocity;
+
 /**
  * Asteroid Panic-specific contact handler. Performs simple contact resolution
  * and checks for game state conditions such as ship-asteroid collisions and

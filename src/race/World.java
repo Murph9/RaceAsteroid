@@ -10,6 +10,12 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
+import race.component.CollisionShape;
+import race.component.Mass;
+import race.component.ModelType;
+import race.component.Position;
+import race.component.Velocity;
+
 public class World extends BaseAppState {
 
 	private static Vector3f[] staticWorld = new Vector3f[] {
@@ -102,7 +108,7 @@ public class World extends BaseAppState {
 		if (type == WorldSpawnType.Infinite) {
 			//spawn initial things
 			spawnAsObjects(initialState, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
-			//spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
+			spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
 		}
 		
 		if (type == WorldSpawnType.Static) {
@@ -159,13 +165,13 @@ public class World extends BaseAppState {
 			System.out.print("What:" + v);
 			return;
 		}
-		
+
 		for (int i = 0; i < v.length; i+=2) {
 			EntityId line = ed.createEntity();
-			ed.setComponents(line, 
+			ed.setComponents(line,
 					new Position(offset.add(v[i])),
 					new Velocity(new Vector3f()),
-					CollisionShape.Line(v[i+1]),
+					CollisionShape.Line(v[i+1], modelType == RetroPanicModelFactory.MODEL_LINE),
 					new Mass(10000),
 					new ModelType(modelType));
 		}

@@ -8,6 +8,11 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
+import race.component.Acceleration;
+import race.component.Drag;
+import race.component.Position;
+import race.component.Velocity;
+
 
 public class PhysicsState extends BaseAppState {
 
@@ -87,7 +92,7 @@ public class PhysicsState extends BaseAppState {
 			orientation = addScaledVector(orientation, vel.getAngular(), tpf);
 			orientation.normalizeLocal();
 
-			e.set(new Position(loc, orientation));
+			e.set(new race.component.Position(loc, orientation));
 		}
 	}
 

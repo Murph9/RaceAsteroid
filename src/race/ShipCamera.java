@@ -6,6 +6,8 @@ import com.jme3.renderer.Camera;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 
+import race.component.Position;
+
 
 public class ShipCamera extends BaseAppState {
 

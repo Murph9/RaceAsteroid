@@ -17,6 +17,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import race.component.Colour;
+import race.component.ModelType;
+import race.component.Position;
+
 /**
  * Watches entities with Position and ModelType components and creates/destroys
  * Spatials as needed as well as moving them to the appropriate locations.

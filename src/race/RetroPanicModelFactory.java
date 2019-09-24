@@ -14,6 +14,10 @@ import com.jme3.texture.Texture;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 
+import race.component.CollisionShape;
+import race.component.Colour;
+import race.component.ModelType;
+
 /**
  * Implements the Asteroid Panic spatials as quads with sprites selected from a
  * sprite sheet.

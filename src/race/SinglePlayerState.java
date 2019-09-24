@@ -7,8 +7,15 @@ import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 
-
 import race.World.WorldSpawnType;
+import race.component.ModelType;
+import race.component.Position;
+import race.component.Stun;
+import race.component.Velocity;
+import race.component.Acceleration;
+import race.component.CollisionShape;
+import race.component.Drag;
+import race.component.Mass;
 
 
 /**

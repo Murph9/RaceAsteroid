@@ -9,7 +9,9 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
-import race.CollisionShape.Type;
+import race.component.CollisionShape;
+import race.component.Position;
+import race.component.CollisionShape.Type;
 
 import java.util.Set;
 
@@ -82,6 +84,8 @@ public class CollisionState extends BaseAppState {
 		}
 	}
 	private void generateContactsLineCircle(Entity line, Entity circle) {
+		if (line.get(CollisionShape.class).getGhost())
+			return; //ignore ghost objects
 
 		//line
 		CollisionShape lcs = line.get(CollisionShape.class);

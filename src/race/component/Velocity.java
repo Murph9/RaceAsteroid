@@ -1,7 +1,9 @@
-package race;
+package race.component;
 
 import com.jme3.math.Vector3f;
 import com.simsilica.es.EntityComponent;
+
+import race.H;
 
 
 /**
