@@ -1,4 +1,4 @@
-package race.component;
+package component;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;

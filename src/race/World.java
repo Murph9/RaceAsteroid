@@ -10,11 +10,11 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
-import race.component.CollisionShape;
-import race.component.Mass;
-import race.component.ModelType;
-import race.component.Position;
-import race.component.Velocity;
+import component.CollisionShape;
+import component.Mass;
+import component.ModelType;
+import component.Position;
+import component.Velocity;
 
 public class World extends BaseAppState {
 

@@ -14,10 +14,10 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.SpringGridLayout;
 
-import race.component.Acceleration;
-import race.component.Position;
-import race.component.Stun;
-import race.component.Velocity;
+import component.Acceleration;
+import component.Position;
+import component.Stun;
+import component.Velocity;
 
 public class DebugShipUI extends BaseAppState {
 

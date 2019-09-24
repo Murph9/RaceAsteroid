@@ -6,7 +6,7 @@ import com.jme3.renderer.Camera;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 
-import race.component.Position;
+import component.Position;
 
 
 public class ShipCamera extends BaseAppState {
@@ -15,6 +15,8 @@ public class ShipCamera extends BaseAppState {
 	private EntityId ship;
 	
 	private Camera cam;
+
+	//TODO add smoothing and 'look ahead'
 	
 	public ShipCamera(EntityId ship) {
 		this.ship = ship;

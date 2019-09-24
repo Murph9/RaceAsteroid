@@ -1,4 +1,4 @@
-package race.component;
+package component;
 
 import com.simsilica.es.EntityComponent;
 

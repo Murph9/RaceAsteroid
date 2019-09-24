@@ -8,22 +8,19 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 
 import race.World.WorldSpawnType;
-import race.component.ModelType;
-import race.component.Position;
-import race.component.Stun;
-import race.component.Velocity;
-import race.component.Acceleration;
-import race.component.CollisionShape;
-import race.component.Drag;
-import race.component.Mass;
+import component.ModelType;
+import component.Position;
+import component.Stun;
+import component.Velocity;
+import component.Acceleration;
+import component.CollisionShape;
+import component.Drag;
+import component.Mass;
 
 
 /**
- *  Keeps track of the single-player game state and
- *  transitions through the state machine as game conditions
- *  change.
- *
- *  @author    Paul Speed
+ *  Keeps track of the single-player game state and transitions
+ *  through the state machine as game conditions change.
  */
 public class SinglePlayerState extends BaseAppState {
 
@@ -122,7 +119,7 @@ public class SinglePlayerState extends BaseAppState {
         getState(ShipControlState.class).setEnabled(false);
         getStateManager().attach(new ShipCamera(ship));
         getState(ShipCamera.class).setEnabled(false);
-        getStateManager().attach(new World(ship, WorldSpawnType.Infinite));
+        getStateManager().attach(new World(ship, WorldSpawnType.Static));
         getState(World.class).setEnabled(false);
         getStateManager().attach(new DebugShipUI(ship));
         getState(DebugShipUI.class).setEnabled(false);

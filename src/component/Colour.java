@@ -1,4 +1,4 @@
-package race.component;
+package component;
 
 import com.jme3.math.ColorRGBA;
 import com.simsilica.es.EntityComponent;

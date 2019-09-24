@@ -17,15 +17,15 @@ import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
 
-import race.component.Acceleration;
-import race.component.CollisionShape;
-import race.component.Decay;
-import race.component.Drag;
-import race.component.ModelType;
-import race.component.CollisionShape.Type;
-import race.component.Position;
-import race.component.Stun;
-import race.component.Velocity;
+import component.Acceleration;
+import component.CollisionShape;
+import component.Decay;
+import component.Drag;
+import component.ModelType;
+import component.CollisionShape.Type;
+import component.Position;
+import component.Stun;
+import component.Velocity;
 
 /**
  * Maps player input into ship control

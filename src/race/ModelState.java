@@ -17,9 +17,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import race.component.Colour;
-import race.component.ModelType;
-import race.component.Position;
+import component.Colour;
+import component.ModelType;
+import component.Position;
 
 /**
  * Watches entities with Position and ModelType components and creates/destroys

@@ -9,9 +9,9 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
-import race.component.CollisionShape;
-import race.component.Position;
-import race.component.CollisionShape.Type;
+import component.CollisionShape;
+import component.Position;
+import component.CollisionShape.Type;
 
 import java.util.Set;
 

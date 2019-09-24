@@ -6,7 +6,7 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
-import race.component.Decay;
+import component.Decay;
 
 /**
  *  General app state that watches entities with a Decay component

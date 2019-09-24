@@ -14,9 +14,9 @@ import com.jme3.texture.Texture;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 
-import race.component.CollisionShape;
-import race.component.Colour;
-import race.component.ModelType;
+import component.CollisionShape;
+import component.Colour;
+import component.ModelType;
 
 /**
  * Implements the Asteroid Panic spatials as quads with sprites selected from a sprite sheet.
@@ -25,8 +25,8 @@ public class RetroPanicModelFactory implements ModelFactory {
 
 	public static final String MODEL_SHIP = "ship";
 	public static final String MODEL_THRUST = "thrust";
-	public static final String MODEL_WALL = "wall"; //has collision
-	public static final String MODEL_LINE = "line"; //does not have collision
+	public static final String MODEL_WALL = "wall";
+	public static final String MODEL_LINE = "line";
 
 	private AssetManager assets;
 	private EntityData ed;
