@@ -3,6 +3,7 @@ package race;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
@@ -18,26 +19,29 @@ import com.simsilica.lemur.input.StateFunctionListener;
 
 import race.component.Acceleration;
 import race.component.CollisionShape;
+import race.component.Decay;
+import race.component.Drag;
+import race.component.ModelType;
 import race.component.CollisionShape.Type;
 import race.component.Position;
 import race.component.Stun;
 import race.component.Velocity;
 
 /**
- * Maps player input into ship control.
- *
- * @author Paul Speed (modified a lot by murph)
+ * Maps player input into ship control
+ * 
+ * @author murph
  */
 public class ShipControlState extends BaseAppState implements AnalogFunctionListener, StateFunctionListener {
 
 	private EntityData ed;
 	private EntityId ship;
 	
-	private static final float ROTATE_SPEED = 4;
-	public static final long COLLISION_STUN_TIME = 400;
+	private static final float ROTATE_SPEED = 8;
+	public static final long COLLISION_STUN_TIME = 350;
 	
-	private static final float RAY_CAST_LENGTH = 0.8f;
-	private static final float ACCEL_VALUE = 3f;
+	private static final float RAY_CAST_LENGTH = 1.6f;
+	private static final float ACCEL_VALUE = 2.5f;
 	
 	private static final float WALL_SCALE_A = 5.66f;
 	private static final float WALL_SCALE_B = 3.75f;
@@ -104,19 +108,18 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 				lastThrustTime = 0;
 
-				// TODO EmitterState causes massive GC lag
 				// Create a thrust particle
-				/*EntityId thrust = ed.createEntity();
-				Vector3f thrustVel = vel.getLinear().add(accel.mult(-5));
+				EntityId thrust = ed.createEntity();
+				Vector3f thrustVel = vel.getLinear().add(accel.mult(-1));
 				Vector3f thrustPos = pos.getLocation().add(accel.normalize().multLocal(-0.1f));
 				ed.setComponents(thrust, 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
 						new Acceleration(new Vector3f()),
-						new Drag(0,0),
+						new Drag(0, 0),
 						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
-						new Decay(100));
-				*/
+						new Decay(250));
+				
 			} else if (value == 0) {
 				lastThrustTime = THRUST_INTERVAL;
 			}
@@ -125,24 +128,31 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 	private float behindShipScale() {
 		Vector3f rayStart = ed.getComponent(ship, Position.class).getLocation();
-		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0,-RAY_CAST_LENGTH,0));
+		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0, -RAY_CAST_LENGTH, 0));
 		
-		//TODO throw out 2 rays about 30 degrees apart (because its not just one)
+		Vector3f rayDirOff1 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * 30, Vector3f.UNIT_Z).mult(rayDir);
+		Vector3f rayDirOff2 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * -30, Vector3f.UNIT_Z).mult(rayDir);
+
 		//TODO is also seems that boosting off the wall spins the craft a little, so these 2 rays are important
 		
 		EntitySet entities = ed.getEntities(CollisionShape.class);
-		float minDist = 1;
+		float minDist = 10;
 		for (Entity entity: entities) {
 			CollisionShape shape = ed.getComponent(entity.getId(), CollisionShape.class);
 			if (shape != null && shape.getType() == Type.Line && !shape.getGhost()) {
 				Vector3f p = ed.getComponent(entity.getId(), Position.class).getLocation();
 				Vector3f r = shape.getDir();
 				
-				H.IntersectResult result = H.linesIntersectXY(rayStart, rayStart.add(rayDir), p, p.add(r));
+				H.IntersectResult result = H.linesIntersectXY(rayStart, rayStart.add(rayDirOff1), p, p.add(r));
+				if (result.success)
+					minDist = Math.min(minDist, result.t);
+
+				result = H.linesIntersectXY(rayStart, rayStart.add(rayDirOff2), p, p.add(r));
 				if (result.success)
 					minDist = Math.min(minDist, result.t);
 			}
 		}
+
 		return calcForceDiff(minDist);
 	}
 

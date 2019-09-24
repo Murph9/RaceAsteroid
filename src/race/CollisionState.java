@@ -128,7 +128,7 @@ public class CollisionState extends BaseAppState {
 	protected void initialize(Application app) {
 		ed = getState(EntityDataState.class).getEntityData();
 		entities = ed.getEntities(Position.class, CollisionShape.class);
-
+		
 		if (contactHandler != null) {
 			contactHandler.setCollisionState(this);
 		}

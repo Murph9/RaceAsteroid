@@ -24,6 +24,7 @@ public class MainMenuState extends BaseAppState {
     public MainMenuState() {
     }
 
+    @SuppressWarnings("unchecked") //for the varargs on addClickCommands
     @Override
     protected void initialize(Application app) {
 

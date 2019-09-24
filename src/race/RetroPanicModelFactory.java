@@ -19,10 +19,7 @@ import race.component.Colour;
 import race.component.ModelType;
 
 /**
- * Implements the Asteroid Panic spatials as quads with sprites selected from a
- * sprite sheet.
- *
- * @author Paul Speed
+ * Implements the Asteroid Panic spatials as quads with sprites selected from a sprite sheet.
  */
 public class RetroPanicModelFactory implements ModelFactory {
 
@@ -31,7 +28,6 @@ public class RetroPanicModelFactory implements ModelFactory {
 	public static final String MODEL_WALL = "wall"; //has collision
 	public static final String MODEL_LINE = "line"; //does not have collision
 
-	private ModelState state;
 	private AssetManager assets;
 	private EntityData ed;
 
@@ -40,7 +36,6 @@ public class RetroPanicModelFactory implements ModelFactory {
 	private static final float cellSize = 128f / 1024f;
 
 	public void setState(ModelState state) {
-		this.state = state;
 		this.assets = state.getApplication().getAssetManager();
 		this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
 
