@@ -20,7 +20,6 @@ import com.simsilica.lemur.input.StateFunctionListener;
 import component.Acceleration;
 import component.CollisionShape;
 import component.Decay;
-import component.Drag;
 import component.ModelType;
 import component.CollisionShape.Type;
 import component.Position;

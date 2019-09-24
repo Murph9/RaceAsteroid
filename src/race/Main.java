@@ -30,6 +30,7 @@ public class Main extends SimpleApplication {
             new ThrustPhysicsState(),
             new CollisionState(new PanicContactHandler()),
             new DecayState(),
+            new DiedAppState(),
             new ModelState(new RetroPanicModelFactory()),
             new MainMenuState());
     }
