@@ -6,13 +6,12 @@ import com.simsilica.es.EntityData;
 
 import component.Mass;
 import component.Stun;
+import component.Stunable;
 import component.Velocity;
 
 /**
  * Performs simple contact resolution.
  * The resolveCollision() method is general for any frictionless contact resolution scheme.
- *
- * @author Paul Speed
  */
 public class RaceContactHandler implements ContactHandler {
 
@@ -38,13 +37,17 @@ public class RaceContactHandler implements ContactHandler {
 		return 0;
 	}
 
-	protected void resolveCollision(Entity line, Entity ship, Vector3f cp, Vector3f cn, float penetration) {
-		float invMass1 = getInvMass(line);
-		float invMass2 = getInvMass(ship);
+	public void handleContact(Entity e1, Entity e2, Vector3f cp, Vector3f cn, float penetration) {
+		resolveCollision(e1, e2, cp, cn, penetration);
+	}
 
-		Velocity v1 = ed.getComponent(line.getId(), Velocity.class);
+	protected void resolveCollision(Entity e1, Entity e2, Vector3f cp, Vector3f cn, float penetration) {
+		float invMass1 = getInvMass(e1);
+		float invMass2 = getInvMass(e2);
+
+		Velocity v1 = ed.getComponent(e1.getId(), Velocity.class);
 		Vector3f vl1 = v1.getLinear();
-		Velocity v2 = ed.getComponent(ship.getId(), Velocity.class);
+		Velocity v2 = ed.getComponent(e2.getId(), Velocity.class);
 		Vector3f vl2 = v2.getLinear();
 
 		Vector3f vRel = vl2.subtract(vl1);
@@ -59,14 +62,20 @@ public class RaceContactHandler implements ContactHandler {
 
 		float impulse = (-(1 + restitution) * relNormalVel) / (invMass1 + invMass2);
 
-		// Apply the impulse to the velocities
+		// Apply the impulse to the velocities (0 mass will mean no motion)
+		vl1.addLocal(cn.mult(-impulse * invMass1));
+		e1.set(new Velocity(vl1, v1.getAngular()));
+
 		vl2.addLocal(cn.mult(impulse * invMass2));
-		ship.set(new Velocity(vl2, v2.getAngular()));
-		
-		ship.set(new Stun(ShipControlState.COLLISION_STUN_TIME));
+		e2.set(new Velocity(vl2, v2.getAngular()));
+
+		stun(e1);
+		stun(e2);
 	}
 
-	public void handleContact(Entity line, Entity circle, Vector3f cp, Vector3f cn, float penetration) {
-		resolveCollision(line, circle, cp, cn, penetration);
+	private void stun(Entity e) {
+		if (ed.getComponent(e.getId(), Stunable.class) != null) {
+			e.set(new Stun(ShipControlState.COLLISION_STUN_TIME));
+		}
 	}
 }

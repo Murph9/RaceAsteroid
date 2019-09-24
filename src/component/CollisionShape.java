@@ -5,7 +5,6 @@ import com.simsilica.es.EntityComponent;
 
 /**
  *  Collision shape, has line and circle
- *  @author murph
  */
 public class CollisionShape implements EntityComponent
 {
@@ -23,8 +22,8 @@ public class CollisionShape implements EntityComponent
         return new CollisionShape(Type.Line, dir, 0, ghost);
     }
     
-    public static CollisionShape Circle(float radius) {
-        return new CollisionShape(Type.Circle, null, radius, false);
+    public static CollisionShape Circle(float radius, boolean ghost) {
+        return new CollisionShape(Type.Circle, null, radius, ghost);
     }
 
     private CollisionShape(Type type, Vector3f dir, float radius, boolean ghost) {

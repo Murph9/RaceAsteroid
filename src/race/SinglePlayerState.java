@@ -11,6 +11,7 @@ import race.World.WorldSpawnType;
 import component.ModelType;
 import component.Position;
 import component.Stun;
+import component.Stunable;
 import component.Velocity;
 import component.Acceleration;
 import component.CollisionShape;
@@ -25,6 +26,8 @@ import component.Mass;
 public class SinglePlayerState extends BaseAppState {
 
     protected enum GameState { LoadLevel, Joining, Playing, Death, EndLevel, GameOver };
+
+    private static final double SHIP_MASS = 1;
 
     private EntityData ed;
     private EntityId ship;
@@ -83,7 +86,7 @@ public class SinglePlayerState extends BaseAppState {
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f()),
                          new Acceleration(new Vector3f()),
-                         new Mass(mobile ? 0.1 : 0.0),
+                         new Mass(mobile ? SHIP_MASS : 0),
                          new Stun(0));
         getState(ShipControlState.class).setEnabled(mobile);
         getState(ShipCamera.class).setEnabled(mobile);
@@ -110,9 +113,9 @@ public class SinglePlayerState extends BaseAppState {
                          new Velocity(new Vector3f(), new Vector3f()),
                          new Acceleration(new Vector3f(), new Vector3f()),
                          new Drag(0.3f, 0.8f),
-                         CollisionShape.Circle(0.1f),
-                         new Mass(1),
-                         new Stun(0),
+                         CollisionShape.Circle(0.1f, false),
+                         new Mass(SHIP_MASS),
+                         new Stunable(),
                          new ModelType(RaceModelFactory.MODEL_SHIP));
         
         getStateManager().attach(new ShipControlState(ship));

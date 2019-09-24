@@ -62,11 +62,19 @@ public class CollisionState extends BaseAppState {
 	}
 
 	protected void generateContacts(Entity e1, Entity e2) {
-		// only handles collision between circle and line elements
+		if (e1.get(CollisionShape.class).getGhost() || e2.get(CollisionShape.class).getGhost())
+			return; // ignore ghost objects
+
+		// only handles collision between circle/circle and circle/line
 
 		CollisionShape cs1 = ed.getComponent(e1.getId(), CollisionShape.class);
 		CollisionShape cs2 = ed.getComponent(e2.getId(), CollisionShape.class);
 		
+		// attempt circle/circle
+		if (cs1.getType() == Type.Circle && cs2.getType() == Type.Circle) {
+			generateContactsCircles(e1, e2);
+		}
+
 		// attempt line/circle
 		if (cs1.getType() == Type.Line && cs2.getType() == Type.Circle) {
 			generateContactsLineCircle(e1, e2);
@@ -77,10 +85,38 @@ public class CollisionState extends BaseAppState {
 			generateContactsLineCircle(e2, e1);
 		}
 	}
-	private void generateContactsLineCircle(Entity line, Entity circle) {
-		if (line.get(CollisionShape.class).getGhost())
-			return; //ignore ghost objects
 
+	private void generateContactsCircles(Entity e1, Entity e2)
+	{
+		Position p1 = e1.get(Position.class);
+		Position p2 = e2.get(Position.class);
+		CollisionShape s1 = e1.get(CollisionShape.class);
+		float r1 = s1.getRadius();
+		CollisionShape s2 = e2.get(CollisionShape.class);
+		float r2 = s2.getRadius();
+		float threshold = r1 + r2;
+		threshold *= threshold;
+
+		float distSq = p1.getLocation().distanceSquared(p2.getLocation());
+		if (distSq > threshold) {
+			return; // no collision
+		}
+
+		// Find the contact normal.
+		Vector3f cn = p2.getLocation().subtract(p1.getLocation());
+		float dist = cn.length();
+		cn.multLocal(1 / dist); // normalize it
+
+		// Positive if penetrating
+		float penetration = (r1 + r2) - dist;
+
+		// Calculate a contact point half-way along the penetration
+		Vector3f cp = p1.getLocation().add(cn.mult(r1 - penetration * 0.5f));
+
+		contactHandler.handleContact(e1, e2, cp, cn, penetration);
+	}
+
+	private void generateContactsLineCircle(Entity line, Entity circle) {
 		//line
 		CollisionShape lcs = line.get(CollisionShape.class);
 		Vector3f a = line.get(Position.class).getLocation();
