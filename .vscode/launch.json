@@ -1,0 +1,14 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // For info: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<RaceAsteroid>",
+            "request": "launch",
+            "mainClass": "race.Main",
+            "projectName": "RaceAsteroid"
+        }
+    ]
+}

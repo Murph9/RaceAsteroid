@@ -13,15 +13,15 @@ import com.simsilica.es.EntitySet;
 public class World extends BaseAppState {
 
 	private static Vector3f[] staticWorld = new Vector3f[] {
-			H.v3(-1,2,0), H.v3(2,0,0),
-			H.v3(1,2,0), H.v3(1,-1,0),
-			H.v3(2,1,0), H.v3(0,-2,0),
-			H.v3(2,-1,0), H.v3(-1,-1,0),
+			new Vector3f(-1,2,0), new Vector3f(2,0,0),
+			new Vector3f(1,2,0), new Vector3f(1,-1,0),
+			new Vector3f(2,1,0), new Vector3f(0,-2,0),
+			new Vector3f(2,-1,0), new Vector3f(-1,-1,0),
 			
-			H.v3(1,-2,0), H.v3(-2,0,0),
-			H.v3(-1,-2,0), H.v3(-1,1,0),
-			H.v3(-2,-1,0), H.v3(0,2,0),
-			H.v3(-2,1,0), H.v3(1,1,0),
+			new Vector3f(1,-2,0), new Vector3f(-2,0,0),
+			new Vector3f(-1,-2,0), new Vector3f(-1,1,0),
+			new Vector3f(-2,-1,0), new Vector3f(0,2,0),
+			new Vector3f(-2,1,0), new Vector3f(1,1,0),
 	};
 	
 	private static Vector3f A = new Vector3f(-2,2,0);
@@ -95,7 +95,7 @@ public class World extends BaseAppState {
 	}
 
 	@Override
-	protected void initialize(Application arg0) {
+	protected void initialize(Application app) {
 		ed = getState(EntityDataState.class).getEntityData();
 		set = ed.getEntities(ModelType.class);
 		
@@ -114,7 +114,7 @@ public class World extends BaseAppState {
 	}
 	
 	@Override
-	protected void cleanup(Application arg0) {
+	protected void cleanup(Application app) {
 		// Release the entity set we grabbed previously
 		set.release();
 		set = null;

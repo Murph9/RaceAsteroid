@@ -1,6 +1,7 @@
 package race;
 
 import com.jme3.app.Application;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.simsilica.es.EntityData;
@@ -12,7 +13,6 @@ import com.simsilica.lemur.Insets3f;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.SpringGridLayout;
-import com.simsilica.lemur.event.BaseAppState;
 
 public class DebugShipUI extends BaseAppState {
 
@@ -54,7 +54,7 @@ public class DebugShipUI extends BaseAppState {
 		values.setText("Position: " + p.getLocation() + "\n"
 				+ "Velocity: " + v.getLinear().length() + "\n"
 				+ "Acceleration: " + a.getLinear().length() + "\n"
-				+ "Stun: " + (s!=null? s.getPercent():"") + "\n");
+				+ "Stun: " + (s!=null? s.getPercent():"") + "%\n");
 	}
 	
 	@Override
@@ -62,12 +62,12 @@ public class DebugShipUI extends BaseAppState {
 	}
 
 	@Override
-	protected void disable() {
+	protected void onDisable() {
 		hud.removeFromParent();
 	}
 
 	@Override
-	protected void enable() {
+	protected void onEnable() {
 		Main main = (Main)getApplication();
 		main.getGuiNode().attachChild(hud);
 	}

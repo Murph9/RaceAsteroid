@@ -1,10 +1,11 @@
 package race;
 
 import com.jme3.app.Application;
+import com.jme3.app.state.BaseAppState;
 import com.jme3.renderer.Camera;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
-import com.simsilica.lemur.event.BaseAppState;
+
 
 public class ShipCamera extends BaseAppState {
 
@@ -24,10 +25,10 @@ public class ShipCamera extends BaseAppState {
 	}
 
 	@Override
-	protected void enable() {
+	protected void onEnable() {
 	}
 	@Override
-	protected void disable() {
+	protected void onDisable() {
 	}
 	@Override
 	protected void cleanup(Application app) {
