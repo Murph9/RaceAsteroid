@@ -2,34 +2,33 @@ package race;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
-import component.Position;
+import component.Acceleration;
+import component.Drag;
 import component.Velocity;
 
 
-public class PhysicsState extends BaseAppState {
+public class ThrustPhysicsState extends BaseAppState {
 
 	private EntityData ed;
-	private EntitySet entities;
 	private long lastFrame;
+	private EntitySet accelEntities;
 	
 	@Override
 	protected void initialize(Application app) {
 
 		ed = getState(EntityDataState.class).getEntityData();
-		entities = ed.getEntities(Position.class, Velocity.class);
+		accelEntities = ed.getEntities(Velocity.class, Acceleration.class, Drag.class);
 	}
 
 	@Override
 	protected void cleanup(Application app) {
-		// Release the entity set we grabbed previously
-		entities.release();
-		entities = null;
+		accelEntities.release();
+		accelEntities = null;
 	}
 
 	@Override
@@ -66,21 +65,17 @@ public class PhysicsState extends BaseAppState {
 	}
 
 	protected void integrate(double tpf) {
-		entities.applyChanges();
-		for (Entity e : entities) {
-			Position pos = e.get(Position.class);
+
+		accelEntities.applyChanges();
+		for (Entity e : accelEntities) {
 			Velocity vel = e.get(Velocity.class);
-			
-			Vector3f linear = vel.getLinear();
-			Vector3f loc = pos.getLocation();
-			loc.addLocal((float) (linear.x * tpf), (float) (linear.y * tpf), (float) (linear.z * tpf));
+			Acceleration acc = e.get(Acceleration.class);
+			Drag drag = e.get(Drag.class);
+			Vector3f forces = acc.getLinear().add(drag.getDrag(vel.getLinear()));
+			//no angular acceleration yet
 
-			// A little quaternion magic for adding rotational velocity to orientation
-			Quaternion orientation = pos.getFacing();
-			orientation = H.addScaledVector(orientation, vel.getAngular(), tpf);
-			orientation.normalizeLocal();
-
-			e.set(new component.Position(loc, orientation));
+			Vector3f linear = vel.getLinear().add((float) (forces.x * tpf), (float) (forces.y * tpf), (float) (forces.z * tpf));
+			e.set(new Velocity(linear, vel.getAngular()));
 		}
 	}
 }

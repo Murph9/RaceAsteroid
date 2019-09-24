@@ -5,6 +5,9 @@ import com.jme3.renderer.RenderManager;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.Styles;
 
+// http://cowboyprogramming.com/2007/01/05/evolve-your-heirachy/
+// https://softwareengineering.stackexchange.com/questions/372527/isnt-an-entity-component-system-terrible-for-decoupling-information-hiding
+
 /**
  *  Application entry point.  Sets up the game app states and
  *  initializes the GUI sub-system, styles, and the default
@@ -23,16 +26,16 @@ public class Main extends SimpleApplication {
 
     public Main() {
         super(new EntityDataState(),
-               new PhysicsState(),
-               new CollisionState(new PanicContactHandler()),
-               new DecayState(),
-               new ModelState(new RetroPanicModelFactory()),
-               new MainMenuState());
+            new PhysicsState(),
+            new ThrustPhysicsState(),
+            new CollisionState(new PanicContactHandler()),
+            new DecayState(),
+            new ModelState(new RetroPanicModelFactory()),
+            new MainMenuState());
     }
 
     @Override
     public void simpleInitApp() {
-
         // Initialize the Lemur helper instance
         GuiGlobals.initialize(this);
 

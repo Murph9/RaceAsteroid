@@ -1,5 +1,6 @@
 package race;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
@@ -74,5 +75,24 @@ public class H {
 		if (vec == null)
 			return "x:?, y:?, z:?";
 		return "x:" + H.roundDecimal(vec.x, places) + ", y:" + H.roundDecimal(vec.y, places) + ", z:" + H.roundDecimal(vec.z, places);
+	}
+
+
+	public static Quaternion addScaledVector(Quaternion orientation, Vector3f v, double scale) {
+
+		double x = orientation.getX();
+		double y = orientation.getY();
+		double z = orientation.getZ();
+		double w = orientation.getW();
+
+		Quaternion q = new Quaternion((float) (v.x * scale), (float) (v.y * scale), (float) (v.z * scale), 0);
+		q.multLocal(orientation);
+
+		x = x + q.getX() * 0.5;
+		y = y + q.getY() * 0.5;
+		z = z + q.getZ() * 0.5;
+		w = w + q.getW() * 0.5;
+
+		return new Quaternion((float) x, (float) y, (float) z, (float) w);
 	}
 }
