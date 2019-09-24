@@ -9,11 +9,8 @@ import component.Stun;
 import component.Velocity;
 
 /**
- * Asteroid Panic-specific contact handler. Performs simple contact resolution
- * and checks for game state conditions such as ship-asteroid collisions and
- * missile-asteroid collisions. It updates the PanicPlayer object accordingly
- * with either a score or a death. The resolveCollision() method is general for
- * any frictionless contact resolution scheme.
+ * Performs simple contact resolution.
+ * The resolveCollision() method is general for any frictionless contact resolution scheme.
  *
  * @author Paul Speed
  */
@@ -58,7 +55,7 @@ public class RaceContactHandler implements ContactHandler {
 		}
 
 		// Calculate the change in velocity and we ignore penetration
-		float restitution = 0.5f;//0.99f;
+		float restitution = 0.99f;
 
 		float impulse = (-(1 + restitution) * relNormalVel) / (invMass1 + invMass2);
 

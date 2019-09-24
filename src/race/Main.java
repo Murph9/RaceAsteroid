@@ -45,7 +45,7 @@ public class Main extends SimpleApplication {
 
         // Setup the "retro" style for our HUD and GUI elements
         Styles styles = GuiGlobals.getInstance().getStyles();
-        PanicStyles.initializeStyles(styles);
+        RaceStyles.initializeStyles(styles);
     }
 
     @Override

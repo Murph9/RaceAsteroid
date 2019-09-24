@@ -10,12 +10,9 @@ import com.simsilica.lemur.style.Styles;
 
 
 /**
- *  Sets up some default styles used by the Asteroid Panic
- *  screens.
- *
- *  @author    Paul Speed
+ *  Sets up some default styles used by screens.
  */
-public class PanicStyles {
+public class RaceStyles {
 
     public static final String TITLE_ID = "title";
     public static final String MESSAGE_ID = "message";

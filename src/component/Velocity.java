@@ -8,10 +8,6 @@ import race.H;
 
 /**
  *  Represents the linear and angular velocity for an entity.
- *  This is not Asteroid Panic specific and could be used for
- *  any game requiring this sort of physics.
- *
- *  @author    Paul Speed
  */
 public class Velocity implements EntityComponent
 {

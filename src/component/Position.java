@@ -7,10 +7,7 @@ import com.simsilica.es.EntityComponent;
 import race.H;
 
 /**
- * Represents a position and orientation of an entity. This is a general
- * component that is not necessarily specific to Asteroid Panic.
- *
- * @author Paul Speed
+ * Represents a position and orientation of an entity.
  */
 public class Position implements EntityComponent {
 	private Vector3f location;

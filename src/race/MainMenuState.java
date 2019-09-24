@@ -28,9 +28,9 @@ public class MainMenuState extends BaseAppState {
     @Override
     protected void initialize(Application app) {
 
-        menu = new Container(new SpringGridLayout(), new ElementId(PanicStyles.MENU_ID), "retro");
+        menu = new Container(new SpringGridLayout(), new ElementId(RaceStyles.MENU_ID), "retro");
 
-        menu.addChild(new Label("Race Asteroid", new ElementId(PanicStyles.MENU_TITLE_ID), "retro"));
+        menu.addChild(new Label("Race Asteroid", new ElementId(RaceStyles.MENU_TITLE_ID), "retro"));
 
         Button start = menu.addChild(new Button("Start Game", "retro"));
         start.addClickCommands(new Start());

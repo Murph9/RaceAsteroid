@@ -24,12 +24,8 @@ import component.Position;
 /**
  * Watches entities with Position and ModelType components and creates/destroys
  * Spatials as needed as well as moving them to the appropriate locations.
- * Spatials are created with a ModelFactory callback object that can be game
- * specific. This class is not Asteroid Panic specific and could be used with
- * any game that maps spatials to entities directly. Note: currently model type
- * changes are not detected.
- *
- * @author Paul Speed
+ * Spatials are created with a ModelFactory callback object that can be game specific. 
+ * Note: currently model type changes are not detected.
  */
 public class ModelState extends BaseAppState {
 

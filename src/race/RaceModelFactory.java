@@ -19,7 +19,7 @@ import component.Colour;
 import component.ModelType;
 
 /**
- * Implements the Asteroid Panic spatials as quads with sprites selected from a sprite sheet.
+ * Implements spatials as quads with sprites selected from a sprite sheet.
  */
 public class RaceModelFactory implements ModelFactory {
 
@@ -39,7 +39,7 @@ public class RaceModelFactory implements ModelFactory {
 		this.assets = state.getApplication().getAssetManager();
 		this.ed = state.getApplication().getStateManager().getState(EntityDataState.class).getEntityData();
 
-		sprites = assets.loadTexture("assets/Textures/panic-sprites.png");
+		sprites = assets.loadTexture("assets/Textures/sprites.png");
 	}
 
 	private float[] spriteCoords(int x, int y) {
