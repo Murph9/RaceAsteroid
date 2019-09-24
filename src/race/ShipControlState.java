@@ -3,7 +3,6 @@ package race;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
@@ -20,9 +19,6 @@ import com.simsilica.lemur.input.StateFunctionListener;
 import race.component.Acceleration;
 import race.component.CollisionShape;
 import race.component.CollisionShape.Type;
-import race.component.Decay;
-import race.component.Drag;
-import race.component.ModelType;
 import race.component.Position;
 import race.component.Stun;
 import race.component.Velocity;
@@ -94,8 +90,8 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			
 			Position pos = ed.getComponent(ship, Position.class);
 			accel.set(0, (float) (ACCEL_VALUE * value), 0);
-			float scale = behindShipScale();
-			accel.multLocal(scale);
+			//scale based on wall proximity
+			accel.multLocal(behindShipScale());
 			accel = pos.getFacing().multLocal(accel); // quaternion multlocal applies to the vector
 			
 			//wall collision creates stun effect
@@ -108,18 +104,19 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 				lastThrustTime = 0;
 
-				// Create a thrust particle TODO EmitterState
-				EntityId thrust = ed.createEntity();
+				// TODO EmitterState causes massive GC lag
+				// Create a thrust particle
+				/*EntityId thrust = ed.createEntity();
 				Vector3f thrustVel = vel.getLinear().add(accel.mult(-5));
 				Vector3f thrustPos = pos.getLocation().add(accel.normalize().multLocal(-0.1f));
 				ed.setComponents(thrust, 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
-						new Acceleration(new Vector3f()), 
+						new Acceleration(new Vector3f()),
 						new Drag(0,0),
 						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
 						new Decay(100));
-				
+				*/
 			} else if (value == 0) {
 				lastThrustTime = THRUST_INTERVAL;
 			}
@@ -137,7 +134,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		float minDist = 1;
 		for (Entity entity: entities) {
 			CollisionShape shape = ed.getComponent(entity.getId(), CollisionShape.class);
-			if (shape != null && shape.getType() == Type.Line) {
+			if (shape != null && shape.getType() == Type.Line && !shape.getGhost()) {
 				Vector3f p = ed.getComponent(entity.getId(), Position.class).getLocation();
 				Vector3f r = shape.getDir();
 				
@@ -146,8 +143,15 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 					minDist = Math.min(minDist, result.t);
 			}
 		}
-		float result = Math.max(1, (WALL_SCALE_A*FastMath.exp(-minDist*WALL_SCALE_B)) + (WALL_SCALE_C/minDist)); //never slower 
-		return result;
+		return calcForceDiff(minDist);
+	}
+
+	private float calcForceDiff(float distance) {
+		if (distance <= 0)
+			return 1; // please no divide by zero
+		
+		float result = (WALL_SCALE_A * FastMath.exp(-distance * WALL_SCALE_B)) + (WALL_SCALE_C / distance);
+		return Math.max(1, result);
 	}
 	
 	public void valueChanged(FunctionId func, InputState value, double tpf) {

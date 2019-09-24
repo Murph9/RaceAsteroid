@@ -171,7 +171,7 @@ public class World extends BaseAppState {
 			ed.setComponents(line,
 					new Position(offset.add(v[i])),
 					new Velocity(new Vector3f()),
-					CollisionShape.Line(v[i+1], modelType == RetroPanicModelFactory.MODEL_LINE),
+					CollisionShape.Line(v[i+1], modelType.equals(RetroPanicModelFactory.MODEL_LINE)),
 					new Mass(10000),
 					new ModelType(modelType));
 		}
