@@ -21,7 +21,7 @@ import component.ModelType;
 /**
  * Implements the Asteroid Panic spatials as quads with sprites selected from a sprite sheet.
  */
-public class RetroPanicModelFactory implements ModelFactory {
+public class RaceModelFactory implements ModelFactory {
 
 	public static final String MODEL_SHIP = "ship";
 	public static final String MODEL_THRUST = "thrust";

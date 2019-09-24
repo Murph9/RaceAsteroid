@@ -79,7 +79,7 @@ public class SinglePlayerState extends BaseAppState {
 
     protected void resetShip(boolean mobile) {
         ed.setComponents(ship,
-                         new ModelType(RetroPanicModelFactory.MODEL_SHIP),
+                         new ModelType(RaceModelFactory.MODEL_SHIP),
                          new Position(new Vector3f(), new Quaternion()),
                          new Velocity(new Vector3f()),
                          new Acceleration(new Vector3f()),
@@ -113,7 +113,7 @@ public class SinglePlayerState extends BaseAppState {
                          CollisionShape.Circle(0.1f),
                          new Mass(1),
                          new Stun(0),
-                         new ModelType(RetroPanicModelFactory.MODEL_SHIP));
+                         new ModelType(RaceModelFactory.MODEL_SHIP));
         
         getStateManager().attach(new ShipControlState(ship));
         getState(ShipControlState.class).setEnabled(false);

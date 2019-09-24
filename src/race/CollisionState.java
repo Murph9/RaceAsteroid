@@ -16,18 +16,12 @@ import component.CollisionShape.Type;
 import java.util.Set;
 
 /**
- * Keeps track of the list of colliders and performs collision checks. The
- * concept is general but the implementation is currently "sphere" specific as
- * only radius checks are done using the simplified CollisionShape components.
+ * Keeps track of the list of colliders and performs collision checks.
  * This watches all entities with Position and CollisionShape components. Any
  * generated contacts are passed to a ContactHandler which can deal with them
  * directly or turn them into contact entities or whatever the game requires. No
  * default contact resolution is performed at all and is 100% up to the
- * ContactHandler callback object. For Asteroid Panic, there is a custom handler
- * that implements some of the game logic based on collisions rather than
- * further involving the entity system. This may change.
- *
- * @author Paul Speed
+ * ContactHandler callback object. 
  */
 public class CollisionState extends BaseAppState {
 

@@ -17,11 +17,11 @@ import component.Velocity;
  *
  * @author Paul Speed
  */
-public class PanicContactHandler implements ContactHandler {
+public class RaceContactHandler implements ContactHandler {
 
 	private EntityData ed;
 
-	public PanicContactHandler() {
+	public RaceContactHandler() {
 	}
 
 	public void setCollisionState(CollisionState state) {

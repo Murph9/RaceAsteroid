@@ -115,7 +115,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 				ed.setComponents(thrust, 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
-						new ModelType(RetroPanicModelFactory.MODEL_THRUST),
+						new ModelType(RaceModelFactory.MODEL_THRUST),
 						new Decay(250));
 				
 			} else if (value == 0) {

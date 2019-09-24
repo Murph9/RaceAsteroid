@@ -107,12 +107,12 @@ public class World extends BaseAppState {
 		
 		if (type == WorldSpawnType.Infinite) {
 			//spawn initial things
-			spawnAsObjects(initialState, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
-			spawnAsObjects(helpArrow, RetroPanicModelFactory.MODEL_LINE, new Vector3f());
+			spawnAsObjects(initialState, RaceModelFactory.MODEL_WALL, new Vector3f());
+			spawnAsObjects(helpArrow, RaceModelFactory.MODEL_LINE, new Vector3f());
 		}
 		
 		if (type == WorldSpawnType.Static) {
-			spawnAsObjects(staticWorld, RetroPanicModelFactory.MODEL_WALL, new Vector3f());
+			spawnAsObjects(staticWorld, RaceModelFactory.MODEL_WALL, new Vector3f());
 		}
 		
 		nextSpawn = E.add(F).mult(0.5f);
@@ -154,7 +154,7 @@ public class World extends BaseAppState {
 				e.printStackTrace();
 			}
 		
-		spawnAsObjects(p.walls, RetroPanicModelFactory.MODEL_WALL, this.nextSpawn);
+		spawnAsObjects(p.walls, RaceModelFactory.MODEL_WALL, this.nextSpawn);
 
 		this.nextSpawn.addLocal(p.offset);
 		this.nextSpawnType = p.endType;
@@ -171,7 +171,7 @@ public class World extends BaseAppState {
 			ed.setComponents(line,
 					new Position(offset.add(v[i])),
 					new Velocity(new Vector3f()),
-					CollisionShape.Line(v[i+1], modelType.equals(RetroPanicModelFactory.MODEL_LINE)),
+					CollisionShape.Line(v[i+1], modelType.equals(RaceModelFactory.MODEL_LINE)),
 					new Mass(10000),
 					new ModelType(modelType));
 		}

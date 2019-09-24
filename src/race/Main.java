@@ -28,10 +28,10 @@ public class Main extends SimpleApplication {
         super(new EntityDataState(),
             new PhysicsState(),
             new ThrustPhysicsState(),
-            new CollisionState(new PanicContactHandler()),
+            new CollisionState(new RaceContactHandler()),
             new DecayState(),
             new DiedAppState(),
-            new ModelState(new RetroPanicModelFactory()),
+            new ModelState(new RaceModelFactory()),
             new MainMenuState());
     }
 
