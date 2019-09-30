@@ -21,6 +21,7 @@ import com.simsilica.lemur.input.StateFunctionListener;
 import component.Acceleration;
 import component.CollisionShape;
 import component.Decay;
+import component.Emit;
 import component.Mass;
 import component.ModelType;
 import component.CollisionShape.Type;
@@ -111,8 +112,8 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 				ed.setComponents(thrust, 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
-						new ModelType(RaceModelFactory.MODEL_THRUST),
 						new Mass(0.01),
+						new Emit(),
 						CollisionShape.Circle(0.1f, true),
 						new Decay(250));
 				
