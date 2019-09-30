@@ -18,17 +18,17 @@ import com.simsilica.es.EntityData;
 import com.simsilica.es.EntityId;
 import com.simsilica.es.EntitySet;
 
-import component.Die;
+import component.Emit;
 import component.Position;
 
-public class DiedAppState extends BaseAppState {
+public class EmitterState extends BaseAppState {
 
     private SimpleApplication app;
     private EntityData ed;
     private EntitySet entities;
     private final Map<EntityId, ParticleEmitter> models;
 
-    public DiedAppState() {
+    public EmitterState() {
         this.models = new HashMap<>();
     }
 
@@ -36,7 +36,7 @@ public class DiedAppState extends BaseAppState {
     protected void initialize(Application app) {
         this.app = (SimpleApplication) app;
         this.ed = getState(EntityDataState.class).getEntityData();
-        this.entities = this.ed.getEntities(Die.class, Position.class);
+        this.entities = this.ed.getEntities(Emit.class, Position.class);
     }
 
     @Override
@@ -48,6 +48,7 @@ public class DiedAppState extends BaseAppState {
     @Override
     protected void onEnable() {
     }
+
     @Override
     protected void onDisable() {
     }
@@ -60,7 +61,7 @@ public class DiedAppState extends BaseAppState {
             updateModels(entities.getChangedEntities());
         }
     }
-    
+
     private void removeModels(Set<Entity> entities) {
         for (Entity e : entities) {
             Spatial s = models.remove(e.getId());
@@ -90,6 +91,8 @@ public class DiedAppState extends BaseAppState {
         s.setLocalTranslation(p.getLocation());
     }
 
+
+    //TODO add other types like the image app state
     private ParticleEmitter createExplosion() {
         ParticleEmitter fire = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 30);
         Material mat_red = new Material(app.getAssetManager(), "Common/MatDefs/Misc/Particle.j3md");
