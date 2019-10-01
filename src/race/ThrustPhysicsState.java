@@ -7,8 +7,10 @@ import com.simsilica.es.Entity;
 import com.simsilica.es.EntityData;
 import com.simsilica.es.EntitySet;
 
+import component.AccelModifier;
 import component.Acceleration;
 import component.Drag;
+import component.Stun;
 import component.Velocity;
 
 
@@ -71,7 +73,17 @@ public class ThrustPhysicsState extends BaseAppState {
 			Velocity vel = e.get(Velocity.class);
 			Acceleration acc = e.get(Acceleration.class);
 			Drag drag = e.get(Drag.class);
-			Vector3f forces = acc.getLinear().add(drag.getDrag(vel.getLinear()));
+			Vector3f acceleration = acc.getLinear();
+			AccelModifier am = ed.getComponent(e.getId(), AccelModifier.class);
+			if (am != null) {
+				acceleration = acceleration.mult(am.getValue());
+			}
+			Stun stun = ed.getComponent(e.getId(), Stun.class);
+			if (stun != null && stun.getPercent() < 1) {
+				acceleration = new Vector3f();
+			}
+
+			Vector3f forces = acceleration.add(drag.getDrag(vel.getLinear()));
 			//no angular acceleration yet
 
 			Vector3f linear = vel.getLinear().add((float) (forces.x * tpf), (float) (forces.y * tpf), (float) (forces.z * tpf));

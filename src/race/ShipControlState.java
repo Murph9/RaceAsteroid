@@ -19,6 +19,7 @@ import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
 
+import component.AccelModifier;
 import component.Acceleration;
 import component.CollisionShape;
 import component.Colour;
@@ -39,18 +40,19 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private EntityData ed;
 	private EntityId ship;
 	
-	private static final float ROTATE_SPEED = 8;
-	public static final long COLLISION_STUN_TIME = 350;
+	private static final float ROTATE_SPEED = 5; //rad/sec?
+	public static final long COLLISION_STUN_TIME = 350; //ms
 	
 	private static final float RAY_CAST_LENGTH = 1.6f;
 	private static final float BASE_ACCEL_VALUE = 2.5f;
 	private static final float WALL_FORCE = 3;
 	private static final float WALL_DIST = 0.4f;
 	
-	private static final float THRUST_INTERVAL = 0.05f;
-	private float lastThrustTime = 0.1f;
+	private static final float THRUST_INTERVAL = 0.1f;
+	private float lastThrustTime = THRUST_INTERVAL;
 
 	private Vector3f accel = new Vector3f();
+	private float accelModifier;
 
 	public ShipControlState(EntityId ship) {
 		this.ship = ship;
@@ -99,11 +101,13 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			float dist = closestWall(pos.getLocation());
 			boolean close = dist < WALL_DIST;
 			if (close) {
-				this.accel.multLocal(WALL_FORCE);
+				accelModifier = WALL_FORCE;
+			} else {
+				accelModifier = 1;
 			}
 
 			lastThrustTime += tpf;
-			if (value != 0 && lastThrustTime >= THRUST_INTERVAL && this.accel.length() > 0) {
+			if (value != 0 && lastThrustTime >= THRUST_INTERVAL) {
 
 				lastThrustTime = 0;
 
@@ -184,6 +188,8 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 	@Override
 	public void update(float tpf) {
-		ed.setComponent(ship, new Acceleration(accel, ed.getComponent(ship, Acceleration.class).getAngular()));
-	}		
+		ed.setComponents(ship, 
+			new Acceleration(accel, ed.getComponent(ship, Acceleration.class).getAngular()),
+			new AccelModifier(this.accelModifier));
+	}
 }
