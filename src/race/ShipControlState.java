@@ -2,8 +2,9 @@ package race;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Line;
+import com.jme3.math.LineSegment;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.simsilica.es.Entity;
@@ -20,6 +21,7 @@ import com.simsilica.lemur.input.StateFunctionListener;
 
 import component.Acceleration;
 import component.CollisionShape;
+import component.Colour;
 import component.Decay;
 import component.Mass;
 import component.ModelType;
@@ -43,6 +45,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private static final float RAY_CAST_LENGTH = 1.6f;
 	private static final float BASE_ACCEL_VALUE = 2.5f;
 	private static final float WALL_FORCE = 3;
+	private static final float WALL_DIST = 0.4f;
 	
 	private static final float THRUST_INTERVAL = 0.05f;
 	private float lastThrustTime = 0.1f;
@@ -93,10 +96,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			this.accel.set(0, BASE_ACCEL_VALUE * (float) value, 0);
 			pos.getFacing().multLocal(this.accel); // quaternion multlocal applies to the vector
 
-			//TODO broken
 			float dist = closestWall(pos.getLocation());
-			System.out.println("Dist: " + dist);
-			if (dist < 1) {
+			boolean close = dist < WALL_DIST;
+			if (close) {
 				this.accel.multLocal(WALL_FORCE);
 			}
 
@@ -106,16 +108,26 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 				lastThrustTime = 0;
 
 				// Create a thrust particle
-				EntityId thrust = ed.createEntity();
 				Vector3f thrustVel = vel.getLinear().add(accel.normalize().mult(-1));
 				Vector3f thrustPos = pos.getLocation().add(accel.normalize().multLocal(-0.1f));
-				ed.setComponents(thrust, 
+				ed.setComponents(ed.createEntity(), 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
 						new Mass(0.01),
 						new ModelType(RaceModelFactory.MODEL_THRUST),
 						CollisionShape.Circle(0.1f, true),
+						new Colour(ColorRGBA.White),
 						new Decay(250));
+				if (close) {
+					ed.setComponents(ed.createEntity(), 
+						new Position(thrustPos, new Quaternion()), 
+						new Velocity(thrustVel.mult(-1)),
+						new Mass(0.01),
+						new ModelType(RaceModelFactory.MODEL_THRUST),
+						CollisionShape.Circle(0.2f, true),
+						new Colour(ColorRGBA.Red),
+						new Decay(150));
+				}
 				
 			} else if (value == 0) {
 				lastThrustTime = THRUST_INTERVAL;
@@ -129,7 +141,8 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		for (Entity entity : entities) {
 			CollisionShape shape = ed.getComponent(entity.getId(), CollisionShape.class);
 			if (shape != null && shape.getType() == Type.Line && !shape.getGhost()) {
-				Line l = new Line(ed.getComponent(entity.getId(), Position.class).getLocation(), shape.getDir());
+				Vector3f lineStart = ed.getComponent(entity.getId(), Position.class).getLocation();
+				LineSegment l = new LineSegment(lineStart, lineStart.add(shape.getDir()));
 				minDist = Math.min(minDist, l.distance(pos));
 			}
 		}
