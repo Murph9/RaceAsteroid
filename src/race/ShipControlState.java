@@ -21,7 +21,6 @@ import com.simsilica.lemur.input.StateFunctionListener;
 import component.Acceleration;
 import component.CollisionShape;
 import component.Decay;
-import component.Emit;
 import component.Mass;
 import component.ModelType;
 import component.CollisionShape.Type;
@@ -94,8 +93,9 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			this.accel.set(0, BASE_ACCEL_VALUE * (float) value, 0);
 			pos.getFacing().multLocal(this.accel); // quaternion multlocal applies to the vector
 
-			//TODO move to somewhere else
+			//TODO broken
 			float dist = closestWall(pos.getLocation());
+			System.out.println("Dist: " + dist);
 			if (dist < 1) {
 				this.accel.multLocal(WALL_FORCE);
 			}
@@ -107,13 +107,13 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 
 				// Create a thrust particle
 				EntityId thrust = ed.createEntity();
-				Vector3f thrustVel = vel.getLinear().add(accel.mult(-1));
+				Vector3f thrustVel = vel.getLinear().add(accel.normalize().mult(-1));
 				Vector3f thrustPos = pos.getLocation().add(accel.normalize().multLocal(-0.1f));
 				ed.setComponents(thrust, 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel),
 						new Mass(0.01),
-						new Emit(),
+						new ModelType(RaceModelFactory.MODEL_THRUST),
 						CollisionShape.Circle(0.1f, true),
 						new Decay(250));
 				
