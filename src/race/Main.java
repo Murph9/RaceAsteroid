@@ -28,8 +28,8 @@ public class Main extends SimpleApplication {
             new ThrustPhysicsState(),
             new CollisionState(new RaceContactHandler()),
             new DecayState(),
-            new EmitterState(),
-            new ModelState(new RaceModelFactory()),
+            new EmitterState(new RaceEmitterFactory()),
+            new ModelState(new RaceModelFactory(), new RaceGLModelFactory()),
             new MainMenuState());
     }
 

@@ -35,10 +35,10 @@ public class ModelState extends BaseAppState {
 	private EntitySet entities;
 	private Map<EntityId, Spatial> models = new HashMap<EntityId, Spatial>();
 	private Node modelRoot;
-	private ModelFactory factory;
+	private ModelFactory[] factories;
 
-	public ModelState(ModelFactory factory) {
-		this.factory = factory;
+	public ModelState(ModelFactory ...factory) {
+		this.factories = factory;
 	}
 
 	public Spatial getSpatial(EntityId entity) {
@@ -46,8 +46,13 @@ public class ModelState extends BaseAppState {
 	}
 
 	protected Spatial createSpatial(Entity e) {
+		for (ModelFactory factory: factories) {
+			if (factory.accepts(e))
+				return factory.createModel(e);
+		}
 
-		return factory.createModel(e);
+		log.error("Model factory not found for entity:" + e);
+		return null;
 	}
 
 	protected void addModels(Set<Entity> set) {
@@ -110,8 +115,8 @@ public class ModelState extends BaseAppState {
 
 	@Override
 	protected void initialize(Application app) {
-
-		factory.setState(this);
+		for (ModelFactory factory: factories)
+			factory.setState(this);
 
 		// Grab the set of entities we are interested in
 		ed = getState(EntityDataState.class).getEntityData();
