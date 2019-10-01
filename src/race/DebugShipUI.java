@@ -14,6 +14,7 @@ import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BorderLayout;
 import com.simsilica.lemur.component.SpringGridLayout;
 
+import component.AccelModifier;
 import component.Acceleration;
 import component.Position;
 import component.Stun;
@@ -55,9 +56,10 @@ public class DebugShipUI extends BaseAppState {
 		Velocity v = ed.getComponent(ship, Velocity.class);
 		Acceleration a = ed.getComponent(ship, Acceleration.class);
 		Stun s = ed.getComponent(ship, Stun.class);
+		AccelModifier am = ed.getComponent(ship, AccelModifier.class);
 		
 		values.setText("Position: " + H.round3f(p.getLocation(), 3) + "\n" + "Velocity: " + v.getLinear().length() + "\n"
-				+ "Acceleration: " + a.getLinear().length() + "\n" + s + "\n");
+				+ "Acceleration: " + a.getLinear().length() * am.getValue() + "\n" + s + "\n");
 	}
 	
 	@Override

@@ -40,11 +40,15 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 	private EntityData ed;
 	private EntityId ship;
 	
+	private static final String WALL_PROXIMITY = "WALL_PROXIMITY";
+	private static final String WALL_RAY = "WALL_RAY";
+	private static final String WALL_RAYS = "WALL_RAYS";
+
 	private static final float ROTATE_SPEED = 5; //rad/sec?
 	public static final long COLLISION_STUN_TIME = 350; //ms
 	
-	private static final float RAY_CAST_LENGTH = 1.6f;
-	private static final float BASE_ACCEL_VALUE = 2.5f;
+	private static final float RAY_CAST_LENGTH = 1.1f;
+	private static final float BASE_ACCEL_VALUE = 5f;
 	private static final float WALL_FORCE = 3;
 	private static final float WALL_DIST = 0.4f;
 	
@@ -98,13 +102,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 			this.accel.set(0, BASE_ACCEL_VALUE * (float) value, 0);
 			pos.getFacing().multLocal(this.accel); // quaternion multlocal applies to the vector
 
-			float dist = closestWall(pos.getLocation());
-			boolean close = dist < WALL_DIST;
-			if (close) {
-				accelModifier = WALL_FORCE;
-			} else {
-				accelModifier = 1;
-			}
+			accelModifier = getWallForce(pos.getLocation(), WALL_RAY);
 
 			lastThrustTime += tpf;
 			if (value != 0 && lastThrustTime >= THRUST_INTERVAL) {
@@ -122,7 +120,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 						CollisionShape.Circle(0.1f, true),
 						new Colour(ColorRGBA.White),
 						new Decay(250));
-				if (close) {
+				if (accelModifier != 1) {
 					ed.setComponents(ed.createEntity(), 
 						new Position(thrustPos, new Quaternion()), 
 						new Velocity(thrustVel.mult(-1)),
@@ -139,6 +137,26 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		}
 	}
 	
+	private float getWallForce(Vector3f pos, String type) {
+		if (type.equals(WALL_PROXIMITY)) {
+			float dist = closestWall(pos);
+			if (dist < WALL_DIST) {
+				return WALL_FORCE;
+			}
+		}
+		if (type.equals(WALL_RAY)) {
+			float dist = thrustRayDistSingle(pos);
+			return Math.max(1, (RAY_CAST_LENGTH - dist) * 1.5f + 1);
+		}
+
+		if (type.equals(WALL_RAYS)) {
+			float dist = thrustRayDist(pos);
+			return Math.max(1, (RAY_CAST_LENGTH - dist) * 1.5f + 1);
+		}
+
+		return 1;
+	}
+
 	private float closestWall(Vector3f pos) {
 		EntitySet entities = ed.getEntities(CollisionShape.class);
 		float minDist = Float.MAX_VALUE;
@@ -153,9 +171,7 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 		return minDist;
 	}
 
-	@SuppressWarnings("unused")
-	private float thrustRayDist() {
-		Vector3f rayStart = ed.getComponent(ship, Position.class).getLocation();
+	private float thrustRayDist(Vector3f pos) {
 		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0, -RAY_CAST_LENGTH, 0));
 
 		Vector3f rayDirOff1 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * 30, Vector3f.UNIT_Z).mult(rayDir);
@@ -169,11 +185,31 @@ public class ShipControlState extends BaseAppState implements AnalogFunctionList
 				Vector3f p = ed.getComponent(entity.getId(), Position.class).getLocation();
 				Vector3f r = shape.getDir();
 
-				H.IntersectResult result = H.linesIntersectXY(rayStart, rayStart.add(rayDirOff1), p, p.add(r));
+				H.IntersectResult result = H.linesIntersectXY(pos, pos.add(rayDirOff1), p, p.add(r));
 				if (result.success)
 					minDist = Math.min(minDist, result.t);
 
-				result = H.linesIntersectXY(rayStart, rayStart.add(rayDirOff2), p, p.add(r));
+				result = H.linesIntersectXY(pos, pos.add(rayDirOff2), p, p.add(r));
+				if (result.success)
+					minDist = Math.min(minDist, result.t);
+			}
+		}
+
+		return minDist * RAY_CAST_LENGTH;
+	}
+	
+	private float thrustRayDistSingle(Vector3f pos) {
+		Vector3f rayDir = ed.getComponent(ship, Position.class).getFacing().mult(new Vector3f(0, -RAY_CAST_LENGTH, 0));
+
+		EntitySet entities = ed.getEntities(CollisionShape.class);
+		float minDist = 1;
+		for (Entity entity : entities) {
+			CollisionShape shape = ed.getComponent(entity.getId(), CollisionShape.class);
+			if (shape != null && shape.getType() == Type.Line && !shape.getGhost()) {
+				Vector3f p = ed.getComponent(entity.getId(), Position.class).getLocation();
+				Vector3f r = shape.getDir();
+
+				H.IntersectResult result = H.linesIntersectXY(pos, pos.add(rayDir), p, p.add(r));
 				if (result.success)
 					minDist = Math.min(minDist, result.t);
 			}
