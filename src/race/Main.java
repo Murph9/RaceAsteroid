@@ -10,7 +10,6 @@ import com.simsilica.lemur.style.Styles;
 
 /*
 TODO Ideas
-infinite background grid
 line behind player
 */
 
@@ -29,7 +28,8 @@ public class Main extends SimpleApplication {
     }
 
     public Main() {
-        super(new EntityDataState(),
+        super(new BackgroundState(10, 10),
+            new EntityDataState(),
             new PhysicsState(),
             new ThrustPhysicsState(),
             new CollisionState(new RaceContactHandler()),
