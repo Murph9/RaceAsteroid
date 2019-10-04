@@ -8,11 +8,6 @@ import com.simsilica.lemur.style.Styles;
 // http://cowboyprogramming.com/2007/01/05/evolve-your-heirachy/
 // https://softwareengineering.stackexchange.com/questions/372527/isnt-an-entity-component-system-terrible-for-decoupling-information-hiding
 
-/*
-TODO Ideas
-line behind player
-*/
-
 /**
  *  Application entry point.  Sets up the game app states and
  *  initializes the GUI sub-system, styles, and the default
@@ -36,7 +31,8 @@ public class Main extends SimpleApplication {
             new DecayState(),
             new EmitterState(new RaceEmitterFactory()),
             new ModelState(new RaceModelFactory(), new RaceGLModelFactory()),
-            new MainMenuState());
+            new MainMenuState(),
+            new TailState());
     }
 
     @Override

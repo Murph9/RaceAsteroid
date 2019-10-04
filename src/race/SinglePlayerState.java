@@ -12,6 +12,7 @@ import component.ModelType;
 import component.Position;
 import component.Stun;
 import component.Stunable;
+import component.Tail;
 import component.Velocity;
 import component.Acceleration;
 import component.CollisionShape;
@@ -87,7 +88,8 @@ public class SinglePlayerState extends BaseAppState {
                          new Velocity(new Vector3f()),
                          new Acceleration(new Vector3f()),
                          new Mass(mobile ? SHIP_MASS : 0),
-                         new Stun(0));
+                         new Stun(0),
+                         new Tail());
         getState(ShipControlState.class).setEnabled(mobile);
         getState(ShipCamera.class).setEnabled(mobile);
         getState(World.class).setEnabled(mobile);

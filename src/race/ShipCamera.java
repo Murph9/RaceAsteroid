@@ -18,7 +18,6 @@ public class ShipCamera extends BaseAppState {
 	
 	private Camera cam;
 
-	//TODO add smoothing
 	private boolean lookAhead = false;
 	
 	public ShipCamera(EntityId ship) {
